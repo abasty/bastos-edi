@@ -13,10 +13,13 @@
 
 ## Docker émulateur BASTOS
 
-* BASTOS-WS servi sur websocket (voir avec websocat ou websockets) en local sur
-  le docker
-* Serveur web qui sert minterm-web ou l'emulateur de MiEdit, qui se connecte sur
-  BASTOS-WS
+* [x] BASTOS-WS servi sur websocket (voir avec websocat ou websockets) en local
+  sur le docker : `websocat -t -E --no-line ws-l:127.0.0.1:1967 exec:bastos`
+* [x] Serveur web qui sert minterm-web ou l'emulateur de MiEdit, qui se connecte
+  sur BASTOS-WS
+* [ ] ATTENTION : Certaines touches ne marchenet pas : Ctrl+Enter (as CLS), DEL
+  (as Correction), ESC-ESC pour **break**, flêches clavier, ctrl+G est pris par
+  l'UI, Ctrl+A selctionne tout, Cx/Fin agit bizarrement, autres ?
 * emuljs, basé sur MiEdit, pourrait intégrer un éditeur de basic
   <https://ace.c9.io/> et MiEdit lui-meme (avec conversion vers code ou variable
   BASTOS)
@@ -58,3 +61,9 @@
 * base de données : Turso / Limbo
 * Réponse au GET
 * Rust benchmark IO asynchrones : <https://github.com/jkarneges/rust-async-bench>
+
+# BASTOS sur websocat
+
+```
+wget -qO websocat https://github.com/vi/websocat/releases/latest/download/websocat.x86_64-unknown-linux-musl
+```
