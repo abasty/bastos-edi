@@ -215,7 +215,7 @@ Minitel.pcToMinitelKeys = {
     "ArrowLeft": "Annulation",
     "ArrowRight": "Envoi",
     "Home": "Sommaire",
-    "Escape": "Annulation",
+    // "Escape": "Annulation",
     "F1": "Guide",
     "F2": "Repetition"
 }

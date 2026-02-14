@@ -137,6 +137,7 @@ Minitel.Keyboard = class {
 
         // Install events listener
         document.addEventListener("keyup", event => this.onkeyup(event))
+        document.addEventListener("keydown", event => this.onkeydown(event))
         document.addEventListener("keypress", event => this.onkeypress(event))
         container.autocallback(this)
     }
@@ -242,12 +243,45 @@ Minitel.Keyboard = class {
     }
 
     /**
+     * Handles key down events.
+     * @private
+     */
+    onkeydown(event) {
+        var key = ''
+        console.log('keydown: ', event.key)
+        if (event.ctrlKey) {
+            key = event.key.toUpperCase()
+            if (key == 'A') {
+                key = "Annulation"
+            } else {
+                key = ''
+            }
+        } else if (event.key == "Escape" || event.key == "Backspace") {
+            key = event.key
+        }
+        if (key != '') {
+            this.keypress(this.toMinitel(key))
+            event.preventDefault()
+        }
+    }
+
+    /**
      * Handles key press events.
      * @private
      */
     onkeypress(event) {
+        console.log('keypress: ', event.key)
         this.kShift = event.shiftKey
-        this.keypress(this.toMinitel(event.key))
+        this.kCtrl = event.ctrlKey
+        var key = event.key
+        if (key == "Enter") {
+            if (event.ctrlKey) {
+                key = "CtrlEntree"
+            } else if (event.shiftKey) {
+                key = "MajEntree"
+            }
+        }
+        this.keypress(this.toMinitel(key))
         event.preventDefault()
     }
 
@@ -316,6 +350,7 @@ Minitel.Keyboard = class {
             }
         }
 
+        console.log("toMinitel: " + key)
         if(key in Minitel.keys.Videotex) {
             return Minitel.keys.Videotex[key]
         }
