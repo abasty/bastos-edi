@@ -248,7 +248,6 @@ Minitel.Keyboard = class {
      */
     onkeydown(event) {
         var key = ''
-        console.log('keydown: ', event.key)
         if (event.ctrlKey) {
             key = event.key.toUpperCase()
             if (key == 'A') {
@@ -258,9 +257,7 @@ Minitel.Keyboard = class {
             } else {
                 key = ''
             }
-        } else if (event.key == "Escape" || event.key == "Backspace"
-           || event.key == "PageUp" || event.key == "PageDown"
-           || event.key == "Home") {
+        } else if (Minitel.pcSpecialKeys.includes(event.key)) {
             key = event.key
         }
         if (key != '') {
@@ -274,7 +271,6 @@ Minitel.Keyboard = class {
      * @private
      */
     onkeypress(event) {
-        console.log('keypress: ', event.key)
         this.kShift = event.shiftKey
         this.kCtrl = event.ctrlKey
         var key = event.key
@@ -354,7 +350,6 @@ Minitel.Keyboard = class {
             }
         }
 
-        console.log("toMinitel: " + key)
         if(key in Minitel.keys.Videotex) {
             return Minitel.keys.Videotex[key]
         }

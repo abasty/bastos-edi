@@ -202,20 +202,32 @@ Minitel.specialChars = {
     946: [0x19, 0x7B] // β
 }
 
+Minitel.pcSpecialKeys = [
+    "Escape",
+    "Backspace",
+    "PageUp",
+    "PageDown",
+    "Home",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowUp",
+    "ArrowDown",
+]
+
 /**
  * List of PC to Minitel keys.
  * @member {Object.<string, string>}
  */
 Minitel.pcToMinitelKeys = {
     "Enter": "Envoi",
-    // "Tab": "Suite",
     "PageDown": "Suite",
     "PageUp": "Retour",
     "Backspace": "Correction",
-    // "ArrowLeft": "Annulation",
-    // "ArrowRight": "Envoi",
+    "ArrowLeft": "Gauche",
+    "ArrowRight": "Droite",
+    "ArrowUp": "Haut",
+    "ArrowDown": "Bas",
     "Home": "Sommaire",
-    // "Escape": "Annulation",
     "F1": "Guide",
     "F2": "Repetition"
 }
