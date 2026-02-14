@@ -208,12 +208,12 @@ Minitel.specialChars = {
  */
 Minitel.pcToMinitelKeys = {
     "Enter": "Envoi",
-    "Tab": "Suite",
-    "ArrowDown": "Suite",
-    "ArrowUp": "Retour",
+    // "Tab": "Suite",
+    "PageDown": "Suite",
+    "PageUp": "Retour",
     "Backspace": "Correction",
-    "ArrowLeft": "Annulation",
-    "ArrowRight": "Envoi",
+    // "ArrowLeft": "Annulation",
+    // "ArrowRight": "Envoi",
     "Home": "Sommaire",
     // "Escape": "Annulation",
     "F1": "Guide",
@@ -226,6 +226,7 @@ Minitel.pcToMinitelKeys = {
  */
 Minitel.keys = {
     "Videotex": {
+        "\x07" : [0x07],
         "Escape": [0x1B],
         " ": [0x20],
         "!": [0x21],

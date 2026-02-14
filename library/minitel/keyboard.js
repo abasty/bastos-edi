@@ -253,10 +253,14 @@ Minitel.Keyboard = class {
             key = event.key.toUpperCase()
             if (key == 'A') {
                 key = "Annulation"
+            } else if (key == 'G') {
+                key = '\x07'
             } else {
                 key = ''
             }
-        } else if (event.key == "Escape" || event.key == "Backspace") {
+        } else if (event.key == "Escape" || event.key == "Backspace"
+           || event.key == "PageUp" || event.key == "PageDown"
+           || event.key == "Home") {
             key = event.key
         }
         if (key != '') {
