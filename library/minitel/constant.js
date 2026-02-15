@@ -841,6 +841,7 @@ Minitel.states =  {
 
     "pro1": { "*": { notImplemented: "pro1Sequence" } },
     "pro2": {
+        0x64: { goto: "noAck" },
         0x69: { goto: "startFunction" },
         0x6A: { goto: "stopFunction" },
         0x6B: { goto: "speedFunction" }
@@ -865,6 +866,8 @@ Minitel.states =  {
         0x76: { notImplemented: "set4800bps" },
         0x7f: { notImplemented: "set9600bps" }
     },
+
+    "noAck" : { "*": { notImplemented: "noAckModule" } },
 
     "pro3": {
         0x60: { goto: "pro3SwitchOff" },
