@@ -17,17 +17,16 @@
   sur le docker : `websocat -t -E --no-line ws-l:127.0.0.1:1967 exec:bastos`
 * [x] Serveur web qui sert minterm-web ou l'emulateur de MiEdit, qui se connecte
   sur BASTOS-WS
-* [ ] ATTENTION : Certaines touches ne marchenet pas : Ctrl+Enter (as CLS), DEL
+* [x] ATTENTION : Certaines touches ne marchenet pas : Ctrl+Enter (as CLS), DEL
   (as Correction), ESC-ESC pour **break**, flêches clavier, ctrl+G est pris par
   l'UI, Ctrl+A selctionne tout, Cx/Fin agit bizarrement, autres ?
 * emuljs, basé sur MiEdit, pourrait intégrer un éditeur de basic
   <https://ace.c9.io/> et MiEdit lui-meme (avec conversion vers code ou variable
   BASTOS)
 * Connexion au réseau (pour emul WIFI et commande MINITEL)
-* Il faut aussi pouvoir servir un émulateur web qui se connecte à BASTOS par
 * Un répertoire partagé pour le disque BASTOS websocket
-* Au démarrage de docker on lance le service web qui sert minterm et le service
-  BASTOS en websocket
+* Au démarrage de docker on lance le service web qui sert l'émulateur et le
+  service BASTOS en websocket
 
 ## Machine hôte
 
