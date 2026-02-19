@@ -213,6 +213,11 @@
         minitelTab.classList.remove('active');
         editorTab.classList.add('active');
         window.minitelTabActive = false;
+        // Force CodeMirror to refresh its layout and focus the editor
+        setTimeout(() => {
+          editor.refresh();
+          editor.focus();
+        }, 0);
       }
 
       minitelTab.addEventListener('click', showMinitelTab);
