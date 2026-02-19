@@ -7,8 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta http-equiv="Access-Control-Allow-Origin" content="*">
     <title>EDI BASTOS</title>
-    <link rel="stylesheet" href="css/minitel-keyboard.css" />
-	<meta name="author" content="Alain Basty" />
+    <link rel="stylesheet" href="css/minitel-keyboard.css" />    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/default.min.css" />	<meta name="author" content="Alain Basty" />
     <meta name="keywords" content="minitel, vintage, technologie, videotex, basic, programmation" />
     <meta name="description" content="Développez des applications BASTOS (Basic) pour Minitel" />
 	<!-- <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -16,12 +16,51 @@
 	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 	<link rel="manifest" href="/site.webmanifest"> -->
 
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      .editor-container {
+        display: flex;
+        height: 100vh;
+        gap: 10px;
+        padding: 10px;
+        background-color: #3f292b;
+      }
+      .minitel-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+      .code-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+      .CodeMirror {
+        flex: 1;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 12px;
+      }
+      .minitel-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+    </style>
   </head>
   <body>
 
-    <div>
-      <br>
-      <x-minitel data-socket="ws://localhost:1967" data-speed="4800" data-color="false">
+    <div class="editor-container">
+      <div class="minitel-section">
+        <div class="minitel-wrapper">
+          <x-minitel data-socket="ws://localhost:1967" data-speed="4800" data-color="false">
         <canvas class="minitel-screen" data-minitel="screen"></canvas>
         <canvas class="minitel-cursor" data-minitel="cursor"></canvas>
         <import src="import/minitel-keyboard.html"></import>
@@ -33,8 +72,16 @@
             Too bad, your browser does not support HTML5 audio or mp3 format.
         </audio>
       </x-minitel>
+        </div>
+      </div>
+      <div class="code-section">
+        <h3 style="margin: 0 0 10px 0; font-family: Arial, sans-serif; color: #333;">Code Editor</h3>
+        <div id="code-editor"></div>
+      </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/basic/basic.min.js"></script>
     <script src="library/generichelper/generichelper.js"></script>
     <script src="library/import-html/import-html.js"></script>
     <script src="library/autocallback/autocallback.js"></script>
@@ -58,6 +105,23 @@
     <script src="library/minitel/start-emulators.js"></script>
 
     <script src="app/minitel.js"></script>
+
+    <script>
+      // Initialize CodeMirror editor
+      const editor = CodeMirror(document.getElementById('code-editor'), {
+        mode: 'basic',
+        theme: 'default',
+        lineNumbers: true,
+        indentUnit: 4,
+        tabSize: 4,
+        indentWithTabs: false,
+        lineWrapping: true,
+        autofocus: false
+      });
+
+      // Set initial placeholder text
+      editor.setValue('10 PRINT "Hello BASTOS!"\n20 END');
+    </script>
 
   </body>
 </html>
