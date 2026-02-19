@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta http-equiv="Access-Control-Allow-Origin" content="*">
-    <title>EDI BASTOS - Code Editor</title>
+    <title>BASTOS - Code Editor</title>
     <link rel="stylesheet" href="css/minitel-keyboard.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/default.min.css" />
@@ -54,7 +54,7 @@
         flex-direction: column;
         overflow: hidden;
         padding: 10px;
-        background-color: #f0f0f0;
+        gap: 10px;
       }
       .code-section {
         flex: 1;
@@ -62,12 +62,42 @@
         flex-direction: column;
         min-width: 0;
       }
-      .code-header {
-        margin: 0 0 10px 0;
+      .bottombar {
+        background-color: #333;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        flex-shrink: 0;
+      }
+      .bottombar label {
+        color: white;
         font-family: Arial, sans-serif;
-        color: #333;
-        font-size: 16px;
-        font-weight: bold;
+        font-size: 14px;
+        white-space: nowrap;
+      }
+      .bottombar input {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        min-width: 150px;
+      }
+      .bottombar button {
+        padding: 8px 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .bottombar button:hover {
+        background-color: #45a049;
       }
       .CodeMirror {
         flex: 1;
@@ -75,6 +105,7 @@
         border-radius: 4px;
         font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
         font-size: 12px;
+        background-color: #ccc;
       }
     </style>
   </head>
@@ -87,8 +118,12 @@
 
     <div class="container">
       <div class="code-section">
-        <h3 class="code-header">BASTOS Code Editor</h3>
         <div id="code-editor"></div>
+      </div>
+      <div class="bottombar">
+        <label for="filename">Filename:</label>
+        <input type="text" id="filename" value="edit.bas" />
+        <button id="upload-btn">Upload</button>
       </div>
     </div>
 
@@ -133,6 +168,30 @@
 
       // Set initial placeholder text
       editor.setValue('10 PRINT "Hello BASTOS!"\n20 END');
+
+      // Upload button functionality
+      document.getElementById('upload-btn').addEventListener('click', function() {
+        const filename = document.getElementById('filename').value || 'edit.bas';
+        const code = editor.getValue();
+
+        fetch(`/bastos/${filename}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'text/plain'
+          },
+          body: code
+        })
+        .then(response => {
+          if (response.ok) {
+            alert(`File '${filename}' uploaded successfully!`);
+          } else {
+            alert(`Error uploading file: ${response.status} ${response.statusText}`);
+          }
+        })
+        .catch(error => {
+          alert(`Error uploading file: ${error.message}`);
+        });
+      });
     </script>
 
   </body>
