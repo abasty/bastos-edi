@@ -6,35 +6,191 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta http-equiv="Access-Control-Allow-Origin" content="*">
-    <title>EDI BASTOS</title>
+    <title>BASTOS - ÉDI</title>
     <link rel="stylesheet" href="css/minitel-keyboard.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/default.min.css" />
 	<meta name="author" content="Alain Basty" />
     <meta name="keywords" content="minitel, vintage, technologie, videotex, basic, programmation" />
     <meta name="description" content="Développez des applications BASTOS (Basic) pour Minitel" />
-	<!-- <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-	<link rel="manifest" href="/site.webmanifest"> -->
 
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      .navbar {
+        background-color: #333;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        height: 50px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        flex-shrink: 0;
+      }
+      .navbar a {
+        color: white;
+        text-decoration: none;
+        padding: 15px 20px;
+        display: block;
+        transition: background-color 0.3s;
+        cursor: pointer;
+        user-select: none;
+      }
+      .navbar a:hover {
+        background-color: #555;
+      }
+      .navbar a.active {
+        background-color: #4CAF50;
+      }
+      .container {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+        padding: 10px;
+        gap: 10px;
+      }
+      .tab-content {
+        flex: 1;
+        display: none;
+        flex-direction: column;
+        min-width: 0;
+        overflow: hidden;
+      }
+      .tab-content.active {
+        display: flex;
+      }
+      .minitel-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .code-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+        height: 100%;
+      }
+      .bottombar {
+        background-color: #333;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        flex-shrink: 0;
+      }
+      .bottombar label {
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        white-space: nowrap;
+      }
+      .bottombar input {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        min-width: 150px;
+      }
+      .bottombar button {
+        padding: 8px 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .bottombar button:hover {
+        background-color: #45a049;
+      }
+      #code-editor {
+        flex: 1;
+        height: 100%;
+      }
+      .CodeMirror {
+        height: 100% !important;
+        width: 100% !important;
+      }
+      .status-display {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        padding-right: 10px;
+      }
+      .status-icon {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .status-icon.modified {
+        background-color: #ff9800;
+      }
+      .status-icon.sent {
+        background-color: #4CAF50;
+      }
+    </style>
   </head>
   <body>
 
-    <div>
-      <br>
-      <x-minitel data-socket="ws://localhost:1967" data-speed="4800" data-color="false">
+    <div class="navbar">
+      <a id="minitel-tab" class="active">Visionneuse Minitel</a>
+      <a id="editor-tab">Éditeur de Code</a>
+    </div>
+
+    <div class="container">
+      <!-- Minitel Viewer Tab -->
+      <div id="minitel-view" class="tab-content active">
+        <div class="minitel-wrapper">
+          <x-minitel data-socket="ws://localhost:1967" data-speed="4800" data-color="false">
         <canvas class="minitel-screen" data-minitel="screen"></canvas>
         <canvas class="minitel-cursor" data-minitel="cursor"></canvas>
         <import src="import/minitel-keyboard.html"></import>
-        <font  style="font-size:14px;color:White;font-family:Arial,Helvetica">
-        <code>Connected to BASTOS</code>
-        </font>
         <audio class="minitel-beep" data-minitel="beep">
             <source src="sound/minitel-bip.mp3" type="audio/mpeg"/>
             Too bad, your browser does not support HTML5 audio or mp3 format.
         </audio>
       </x-minitel>
+        </div>
+      </div>
+
+      <!-- Code Editor Tab -->
+      <div id="editor-view" class="tab-content">
+        <div class="code-section">
+          <div id="code-editor"></div>
+        </div>
+        <div class="bottombar">
+          <label for="filename">Nom de fichier :</label>
+          <input type="text" id="filename" value="edit.bas" />
+          <button id="open-btn">Ouvrir...</button>
+          <button id="upload-btn">Envoyer</button>
+          <button id="run-btn">Exécuter...</button>
+          <input type="file" id="file-input" style="display: none;" accept=".bas,.txt" />
+          <div class="status-display">
+            <span class="status-icon modified"></span>
+            <span id="status-text">Modifié</span>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/basic/basic.min.js"></script>
     <script src="library/generichelper/generichelper.js"></script>
     <script src="library/import-html/import-html.js"></script>
     <script src="library/autocallback/autocallback.js"></script>
@@ -58,6 +214,226 @@
     <script src="library/minitel/start-emulators.js"></script>
 
     <script src="app/minitel.js"></script>
+
+    <script>
+      // Global variable to track which tab is active
+      window.minitelTabActive = true;
+
+      // Tab switching functionality
+      const minitelTab = document.getElementById('minitel-tab');
+      const editorTab = document.getElementById('editor-tab');
+      const minitelView = document.getElementById('minitel-view');
+      const editorView = document.getElementById('editor-view');
+
+      function showMinitelTab() {
+        minitelView.classList.add('active');
+        editorView.classList.remove('active');
+        minitelTab.classList.add('active');
+        editorTab.classList.remove('active');
+        window.minitelTabActive = true;
+      }
+
+      function showEditorTab() {
+        minitelView.classList.remove('active');
+        editorView.classList.add('active');
+        minitelTab.classList.remove('active');
+        editorTab.classList.add('active');
+        window.minitelTabActive = false;
+        // Force CodeMirror to refresh its layout and focus the editor
+        setTimeout(() => {
+          editor.refresh();
+          editor.focus();
+        }, 0);
+      }
+
+      minitelTab.addEventListener('click', showMinitelTab);
+      editorTab.addEventListener('click', showEditorTab);
+
+      // Initialize CodeMirror editor
+      const editor = CodeMirror(document.getElementById('code-editor'), {
+        mode: 'basic',
+        theme: 'default',
+        lineNumbers: true,
+        indentUnit: 4,
+        tabSize: 4,
+        indentWithTabs: false,
+        lineWrapping: true,
+        autofocus: false
+      });
+
+      // Set initial placeholder text
+      editor.setValue('10 PRINT "Bonjour BASTOS !"\n20 END');
+      // Status display management
+      let updateStatus = function(status) {
+        const statusIcon = document.querySelector('.status-icon');
+        const statusText = document.getElementById('status-text');
+
+        if (status === 'modified') {
+          statusIcon.className = 'status-icon modified';
+          statusText.textContent = 'Modifié';
+        } else if (status === 'sent') {
+          statusIcon.className = 'status-icon sent';
+          statusText.textContent = 'Envoyé';
+        }
+      };
+
+      // Track editor changes
+      editor.on('change', function() {
+        updateStatus('modified');
+      });
+
+      // Function to send text through Minitel keyboard
+      let sendToMinitelKeyboard = function(text) {
+        return new Promise((resolve) => {
+          let index = 0;
+
+          const sendNextChar = () => {
+            if (index >= text.length) {
+              resolve();
+              return;
+            }
+
+            const char = text[index];
+            // The keyboard listens to these events
+            if (char === '\n') {
+                const keypressEvent = new KeyboardEvent('keypress', {
+                key: "Enter",
+                charCode: 13,
+                keyCode: 13,
+                bubbles: true,
+                cancelable: true
+              });
+              document.dispatchEvent(keypressEvent);
+            } else {
+              // For regular characters, dispatch keypress
+              const keypressEvent = new KeyboardEvent('keypress', {
+                key: char,
+                charCode: char.charCodeAt(0),
+                keyCode: char.charCodeAt(0),
+                bubbles: true,
+                cancelable: true
+              });
+              document.dispatchEvent(keypressEvent);
+            }
+            index++;
+
+            // Small delay between key events (50ms)
+            setTimeout(sendNextChar, 50);
+          };
+
+          sendNextChar();
+        });
+      };
+
+      // Open file button functionality
+      const fileInput = document.getElementById('file-input');
+      document.getElementById('open-btn').addEventListener('click', function() {
+        fileInput.click();
+      });
+
+      // Handle file selection
+      fileInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            // Load file content into editor
+            editor.setValue(e.target.result);
+            // Update filename field
+            document.getElementById('filename').value = file.name;
+          };
+          reader.onerror = function() {
+            alert('Erreur lors de la lecture du fichier');
+          };
+          reader.readAsText(file);
+        }
+        // Reset the file input so the same file can be opened again
+        fileInput.value = '';
+      });
+
+      // Upload button functionality
+      const uploadBtn = document.getElementById('upload-btn');
+
+      // Function to upload code if needed
+      let uploadCode = function() {
+        return new Promise((resolve, reject) => {
+          const status = document.getElementById('status-text').textContent;
+
+          // If already sent, no need to upload
+          if (status === 'Envoyé') {
+            resolve();
+            return;
+          }
+
+          const filename = document.getElementById('filename').value || 'edit.bas';
+          let code = editor.getValue();
+          // Add trailing newline if not present
+          if (!code.endsWith('\n')) {
+            code += '\n';
+          }
+
+          fetch(`/bastos/${filename}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'text/plain'
+            },
+            body: code
+          })
+          .then(response => {
+            if (response.ok) {
+              updateStatus('sent');
+              resolve();
+            } else {
+              alert(`Erreur lors de l'envoi du fichier : ${response.status} ${response.statusText}`);
+              reject();
+            }
+          })
+          .catch(error => {
+            alert(`Erreur lors de l'envoi du fichier : ${error.message}`);
+            reject();
+          });
+        });
+      };
+
+      uploadBtn.addEventListener('click', function() {
+        uploadCode();
+      });
+
+      // Run button functionality
+      const runBtn = document.getElementById('run-btn');
+      runBtn.addEventListener('click', async function() {
+        try {
+          // Upload code if modified
+          await uploadCode();
+
+          // Switch to Minitel tab
+          showMinitelTab();
+
+          // Get the filename
+          const filename = document.getElementById('filename').value || 'edit.bas';
+
+          // Create the run command string with newline
+          const runCommand = `run"${filename}"\n`;
+
+          // Wait a bit for tab switch animation
+          setTimeout(() => {
+            // Send run command through Minitel keyboard
+            sendToMinitelKeyboard(runCommand);
+          }, 200);
+
+        } catch (error) {
+          // Error already handled in uploadCode()
+        }
+      });
+
+      // Ctrl+S keyboard shortcut for upload
+      document.addEventListener('keydown', function(event) {
+        if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+          event.preventDefault();
+          uploadBtn.click();
+        }
+      });
+    </script>
 
   </body>
 </html>

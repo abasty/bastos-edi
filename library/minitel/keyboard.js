@@ -239,6 +239,10 @@ Minitel.Keyboard = class {
      * @private
      */
     onkeyup(event) {
+        // If minitel tab is not active, don't process keyboard
+        if(window.minitelTabActive === false) {
+            return
+        }
         event.preventDefault()
     }
 
@@ -247,6 +251,10 @@ Minitel.Keyboard = class {
      * @private
      */
     onkeydown(event) {
+        // If minitel tab is not active, don't process keyboard
+        if(window.minitelTabActive === false) {
+            return
+        }
         var key = ''
         if (event.ctrlKey) {
             key = event.key.toUpperCase()
@@ -271,6 +279,10 @@ Minitel.Keyboard = class {
      * @private
      */
     onkeypress(event) {
+        // If minitel tab is not active, don't process keyboard
+        if(window.minitelTabActive === false) {
+            return
+        }
         this.kShift = event.shiftKey
         this.kCtrl = event.ctrlKey
         var key = event.key
