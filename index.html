@@ -179,6 +179,7 @@
           <input type="text" id="filename" value="edit.bas" />
           <button id="open-btn">Ouvrir...</button>
           <button id="upload-btn">Envoyer</button>
+          <button id="run-btn">Exécuter...</button>
           <input type="file" id="file-input" style="display: none;" accept=".bas,.txt" />
           <div class="status-display">
             <span class="status-icon modified"></span>
@@ -280,6 +281,50 @@
       editor.on('change', function() {
         updateStatus('modified');
       });
+
+      // Function to send text through Minitel keyboard
+      let sendToMinitelKeyboard = function(text) {
+        return new Promise((resolve) => {
+          let index = 0;
+
+          const sendNextChar = () => {
+            if (index >= text.length) {
+              resolve();
+              return;
+            }
+
+            const char = text[index];
+            // The keyboard listens to these events
+            if (char === '\n') {
+                const keypressEvent = new KeyboardEvent('keypress', {
+                key: "Enter",
+                charCode: 13,
+                keyCode: 13,
+                bubbles: true,
+                cancelable: true
+              });
+              document.dispatchEvent(keypressEvent);
+            } else {
+              // For regular characters, dispatch keypress
+              const keypressEvent = new KeyboardEvent('keypress', {
+                key: char,
+                charCode: char.charCodeAt(0),
+                keyCode: char.charCodeAt(0),
+                bubbles: true,
+                cancelable: true
+              });
+              document.dispatchEvent(keypressEvent);
+            }
+            index++;
+
+            // Small delay between key events (50ms)
+            setTimeout(sendNextChar, 50);
+          };
+
+          sendNextChar();
+        });
+      };
+
       // Open file button functionality
       const fileInput = document.getElementById('file-input');
       document.getElementById('open-btn').addEventListener('click', function() {
@@ -308,31 +353,77 @@
 
       // Upload button functionality
       const uploadBtn = document.getElementById('upload-btn');
-      uploadBtn.addEventListener('click', function() {
-        const filename = document.getElementById('filename').value || 'edit.bas';
-        let code = editor.getValue();
-        // Add trailing newline if not present
-        if (!code.endsWith('\n')) {
-          code += '\n';
-        }
 
-        fetch(`/bastos/${filename}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'text/plain'
-          },
-          body: code
-        })
-        .then(response => {
-          if (response.ok) {
-            updateStatus('sent');
-          } else {
-            alert(`Erreur lors de l'envoi du fichier : ${response.status} ${response.statusText}`);
+      // Function to upload code if needed
+      let uploadCode = function() {
+        return new Promise((resolve, reject) => {
+          const status = document.getElementById('status-text').textContent;
+
+          // If already sent, no need to upload
+          if (status === 'Envoyé') {
+            resolve();
+            return;
           }
-        })
-        .catch(error => {
-          alert(`Erreur lors de l'envoi du fichier : ${error.message}`)
+
+          const filename = document.getElementById('filename').value || 'edit.bas';
+          let code = editor.getValue();
+          // Add trailing newline if not present
+          if (!code.endsWith('\n')) {
+            code += '\n';
+          }
+
+          fetch(`/bastos/${filename}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'text/plain'
+            },
+            body: code
+          })
+          .then(response => {
+            if (response.ok) {
+              updateStatus('sent');
+              resolve();
+            } else {
+              alert(`Erreur lors de l'envoi du fichier : ${response.status} ${response.statusText}`);
+              reject();
+            }
+          })
+          .catch(error => {
+            alert(`Erreur lors de l'envoi du fichier : ${error.message}`);
+            reject();
+          });
         });
+      };
+
+      uploadBtn.addEventListener('click', function() {
+        uploadCode();
+      });
+
+      // Run button functionality
+      const runBtn = document.getElementById('run-btn');
+      runBtn.addEventListener('click', async function() {
+        try {
+          // Upload code if modified
+          await uploadCode();
+
+          // Switch to Minitel tab
+          showMinitelTab();
+
+          // Get the filename
+          const filename = document.getElementById('filename').value || 'edit.bas';
+
+          // Create the run command string with newline
+          const runCommand = `run"${filename}"\n`;
+
+          // Wait a bit for tab switch animation
+          setTimeout(() => {
+            // Send run command through Minitel keyboard
+            sendToMinitelKeyboard(runCommand);
+          }, 200);
+
+        } catch (error) {
+          // Error already handled in uploadCode()
+        }
       });
 
       // Ctrl+S keyboard shortcut for upload
