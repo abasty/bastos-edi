@@ -122,6 +122,28 @@
         height: 100% !important;
         width: 100% !important;
       }
+      .status-display {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        padding-right: 10px;
+      }
+      .status-icon {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .status-icon.modified {
+        background-color: #ff9800;
+      }
+      .status-icon.sent {
+        background-color: #4CAF50;
+      }
     </style>
   </head>
   <body>
@@ -158,6 +180,10 @@
           <button id="open-btn">Ouvrir...</button>
           <button id="upload-btn">Envoyer</button>
           <input type="file" id="file-input" style="display: none;" accept=".bas,.txt" />
+          <div class="status-display">
+            <span class="status-icon modified"></span>
+            <span id="status-text">Modifié</span>
+          </div>
         </div>
       </div>
     </div>
@@ -236,7 +262,24 @@
 
       // Set initial placeholder text
       editor.setValue('10 PRINT "Bonjour BASTOS !"\n20 END');
+      // Status display management
+      let updateStatus = function(status) {
+        const statusIcon = document.querySelector('.status-icon');
+        const statusText = document.getElementById('status-text');
 
+        if (status === 'modified') {
+          statusIcon.className = 'status-icon modified';
+          statusText.textContent = 'Modifié';
+        } else if (status === 'sent') {
+          statusIcon.className = 'status-icon sent';
+          statusText.textContent = 'Envoyé';
+        }
+      };
+
+      // Track editor changes
+      editor.on('change', function() {
+        updateStatus('modified');
+      });
       // Open file button functionality
       const fileInput = document.getElementById('file-input');
       document.getElementById('open-btn').addEventListener('click', function() {
@@ -282,7 +325,7 @@
         })
         .then(response => {
           if (response.ok) {
-            alert(`Le fichier '${filename}' a été envoyé avec succès !`);
+            updateStatus('sent');
           } else {
             alert(`Erreur lors de l'envoi du fichier : ${response.status} ${response.statusText}`);
           }
