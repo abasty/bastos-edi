@@ -155,7 +155,9 @@
         <div class="bottombar">
           <label for="filename">Nom de fichier :</label>
           <input type="text" id="filename" value="edit.bas" />
+          <button id="open-btn">Ouvrir...</button>
           <button id="upload-btn">Envoyer</button>
+          <input type="file" id="file-input" style="display: none;" accept=".bas,.txt" />
         </div>
       </div>
     </div>
@@ -234,6 +236,32 @@
 
       // Set initial placeholder text
       editor.setValue('10 PRINT "Bonjour BASTOS !"\n20 END');
+
+      // Open file button functionality
+      const fileInput = document.getElementById('file-input');
+      document.getElementById('open-btn').addEventListener('click', function() {
+        fileInput.click();
+      });
+
+      // Handle file selection
+      fileInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            // Load file content into editor
+            editor.setValue(e.target.result);
+            // Update filename field
+            document.getElementById('filename').value = file.name;
+          };
+          reader.onerror = function() {
+            alert('Erreur lors de la lecture du fichier');
+          };
+          reader.readAsText(file);
+        }
+        // Reset the file input so the same file can be opened again
+        fileInput.value = '';
+      });
 
       // Upload button functionality
       document.getElementById('upload-btn').addEventListener('click', function() {
