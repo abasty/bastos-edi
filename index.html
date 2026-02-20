@@ -264,7 +264,8 @@
       });
 
       // Upload button functionality
-      document.getElementById('upload-btn').addEventListener('click', function() {
+      const uploadBtn = document.getElementById('upload-btn');
+      uploadBtn.addEventListener('click', function() {
         const filename = document.getElementById('filename').value || 'edit.bas';
         let code = editor.getValue();
         // Add trailing newline if not present
@@ -289,6 +290,14 @@
         .catch(error => {
           alert(`Erreur lors de l'envoi du fichier : ${error.message}`)
         });
+      });
+
+      // Ctrl+S keyboard shortcut for upload
+      document.addEventListener('keydown', function(event) {
+        if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+          event.preventDefault();
+          uploadBtn.click();
+        }
       });
     </script>
 
