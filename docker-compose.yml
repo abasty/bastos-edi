@@ -1,8 +1,6 @@
 services:
   bastos-edi:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: bastos-edi
     container_name: bastos-edi
     network_mode: "host"
     volumes:

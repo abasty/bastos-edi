@@ -8,6 +8,10 @@ This Docker configuration provides a complete BASTOS-EDI environment with:
 - Python3 HTTP server for the SPA
 - esptool for ESP device programming
 
+## Network Mode
+
+The container runs with **host network mode**, which means services are directly accessible on the host machine's ports without port mapping. This provides better performance and simpler networking configuration.
+
 ## Services
 
 ### FTP Server (vsftpd)
@@ -27,7 +31,35 @@ This Docker configuration provides a complete BASTOS-EDI environment with:
 
 ## Quick Start
 
-### Using Docker Compose (Recommended)
+### Using make (Recommended)
+
+```bash
+# Build the Docker image
+make docker
+
+# Start the container
+make run
+
+# View logs
+make logs
+
+# Follow logs in real-time
+make logs-f
+
+# Stop the container
+make stop
+
+# Clean up (stop and remove volumes)
+make clean
+
+# Build and run in one command
+make rebuild
+
+# Show all available commands
+make help
+```
+
+### Using Docker Compose
 
 ```bash
 # Build and start the container
@@ -49,15 +81,15 @@ docker-compose down -v
 # Build the image
 docker build -t bastos-edi .
 
-# Run the container
-docker run -d \
-  -p 2121:2121 \
-  -p 9000:9000 \
-  -p 30000-30100:30000-30100 \
+# Run the container (with host network mode)
+docker run --rm -d \
+  --network host \
   -v bastos-data:/data/bastos \
   --name bastos-edi \
   bastos-edi
 ```
+
+**Note:** The `--network host` flag is used to match the docker-compose configuration, allowing services to run directly on the host's network interface.
 
 ## Accessing the Services
 
