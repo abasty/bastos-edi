@@ -160,6 +160,7 @@
 
     <div class="navbar">
       <a id="minitel-tab" class="active">Visionneuse Minitel</a>
+      <a id="files-tab">Fichiers</a>
       <a id="editor-tab">Éditeur de Code</a>
     </div>
 
@@ -198,6 +199,15 @@
           </div>
         </div>
       </div>
+
+      <!-- Files Tab -->
+      <div id="files-view" class="tab-content">
+        <div style="flex: 1; overflow-y: auto; padding: 10px;">
+          <div id="files-list" style="color: white; font-family: Arial, sans-serif; font-size: 14px;">
+            <p>GET /disk</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
@@ -233,22 +243,28 @@
       // Tab switching functionality
       const minitelTab = document.getElementById('minitel-tab');
       const editorTab = document.getElementById('editor-tab');
+      const filesTab = document.getElementById('files-tab');
       const minitelView = document.getElementById('minitel-view');
       const editorView = document.getElementById('editor-view');
+      const filesView = document.getElementById('files-view');
 
       function showMinitelTab() {
         minitelView.classList.add('active');
         editorView.classList.remove('active');
+        filesView.classList.remove('active');
         minitelTab.classList.add('active');
         editorTab.classList.remove('active');
+        filesTab.classList.remove('active');
         window.minitelTabActive = true;
       }
 
       function showEditorTab() {
         minitelView.classList.remove('active');
         editorView.classList.add('active');
+        filesView.classList.remove('active');
         minitelTab.classList.remove('active');
         editorTab.classList.add('active');
+        filesTab.classList.remove('active');
         window.minitelTabActive = false;
         // Force CodeMirror to refresh its layout and focus the editor
         setTimeout(() => {
@@ -257,8 +273,21 @@
         }, 0);
       }
 
+      function showFilesTab() {
+        minitelView.classList.remove('active');
+        editorView.classList.remove('active');
+        filesView.classList.add('active');
+        minitelTab.classList.remove('active');
+        editorTab.classList.remove('active');
+        filesTab.classList.add('active');
+        window.minitelTabActive = false;
+        // Load files list when tab is shown
+        loadFilesList();
+      }
+
       minitelTab.addEventListener('click', showMinitelTab);
       editorTab.addEventListener('click', showEditorTab);
+      filesTab.addEventListener('click', showFilesTab);
 
       // Initialize CodeMirror editor
       const editor = CodeMirror(document.getElementById('code-editor'), {
@@ -446,6 +475,93 @@
           uploadBtn.click();
         }
       });
+
+      // Files tab functionality
+      function loadFilesList() {
+        const filesList = document.getElementById('files-list');
+        filesList.innerHTML = '<p style="color: #999;">Chargement des fichiers...</p>';
+
+        fetch('http://localhost:9000/disk')
+          .then(response => response.text())
+          .then(html => {
+            // Parse HTML to extract filenames
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Try to find all links in the response
+            const links = doc.querySelectorAll('a');
+            const files = [];
+
+            links.forEach(link => {
+              const href = link.getAttribute('href');
+              // Filter out parent directory and other navigation links
+              if (href && href !== '/' && href !== '../' && !href.startsWith('?') && href !== '') {
+                const filename = href.replace(/\/$/, ''); // Remove trailing slash
+                if (filename && !files.includes(filename)) {
+                  files.push(filename);
+                }
+              }
+            });
+
+            if (files.length === 0) {
+              filesList.innerHTML = '<p style="color: #999;">Aucun fichier trouvé.</p>';
+              return;
+            }
+
+            // Sort files alphabetically
+            files.sort();
+
+            // Build HTML for file list
+            let fileListHtml = '';
+            files.forEach(file => {
+              fileListHtml += `<a href="#" data-filename="${file}" style="display: block; color: #4CAF50; text-decoration: none; padding: 8px 0; cursor: pointer; transition: color 0.3s;">${file}</a>`;
+            });
+            filesList.innerHTML = fileListHtml;
+
+            // Add click handlers to file links
+            filesList.querySelectorAll('a').forEach(link => {
+              link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const filename = this.getAttribute('data-filename');
+                downloadAndLoadFile(filename);
+              });
+              link.addEventListener('mouseover', function() {
+                this.style.color = '#45a049';
+                this.style.textDecoration = 'underline';
+              });
+              link.addEventListener('mouseout', function() {
+                this.style.color = '#4CAF50';
+                this.style.textDecoration = 'none';
+              });
+            });
+          })
+          .catch(error => {
+            filesList.innerHTML = `<p style="color: #ff6b6b;">Erreur lors du chargement des fichiers: ${error.message}</p>`;
+          });
+      }
+
+      function downloadAndLoadFile(filename) {
+        fetch(`http://localhost:9000/disk/${filename}`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+          })
+          .then(content => {
+            // Load content into editor
+            editor.setValue(content);
+            // Update filename display
+            document.getElementById('filename').textContent = filename;
+            // Reset status to modified
+            updateStatus('modified');
+            // Switch to editor tab
+            showEditorTab();
+          })
+          .catch(error => {
+            alert(`Erreur lors du téléchargement du fichier: ${error.message}`);
+          });
+      }
     </script>
 
   </body>
