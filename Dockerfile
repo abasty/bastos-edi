@@ -48,20 +48,8 @@ RUN mkdir -p /usr/local/bin
 COPY bin/* /usr/local/bin/
 
 # Configure vsftpd
-RUN mkdir -p /etc/vsftpd && \
-    echo "listen=YES" > /etc/vsftpd/vsftpd.conf && \
-    echo "anonymous_enable=YES" >> /etc/vsftpd/vsftpd.conf && \
-    echo "local_enable=NO" >> /etc/vsftpd/vsftpd.conf && \
-    echo "write_enable=YES" >> /etc/vsftpd/vsftpd.conf && \
-    echo "anon_upload_enable=YES" >> /etc/vsftpd/vsftpd.conf && \
-    echo "anon_mkdir_write_enable=YES" >> /etc/vsftpd/vsftpd.conf && \
-    echo "anon_other_write_enable=YES" >> /etc/vsftpd/vsftpd.conf && \
-    echo "anon_root=/data/bastos" >> /etc/vsftpd/vsftpd.conf && \
-    echo "no_anon_password=YES" >> /etc/vsftpd/vsftpd.conf && \
-    echo "hide_ids=YES" >> /etc/vsftpd/vsftpd.conf && \
-    echo "pasv_enable=YES" >> /etc/vsftpd/vsftpd.conf && \
-    echo "pasv_min_port=30000" >> /etc/vsftpd/vsftpd.conf && \
-    echo "pasv_max_port=30100" >> /etc/vsftpd/vsftpd.conf
+RUN mkdir -p /etc/vsftpd
+COPY ftp/vsftpd.conf /etc/vsftpd/vsftpd.conf
 
 # Create vsftpd lock file
 RUN touch /var/run/vsftpd.pid && chmod 777 /var/run/vsftpd.pid
