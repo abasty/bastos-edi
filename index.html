@@ -186,6 +186,7 @@
           <div id="code-editor"></div>
         </div>
         <div class="bottombar">
+          <button id="new-btn">Nouveau</button>
           <button id="upload-btn">Envoyer</button>
           <button id="run-btn">Exécuter...</button>
           <div class="filename-display">
@@ -299,8 +300,6 @@
         autofocus: false
       });
 
-      // Set initial placeholder text
-      editor.setValue('10 PRINT "Bonjour BASTOS !"\n20 END');
       // Status display management
       let updateStatus = function(status) {
         const statusIcon = document.querySelector('.status-icon');
@@ -314,6 +313,13 @@
           statusText.textContent = 'Envoyé';
         }
       };
+
+      // Set initial placeholder text
+      editor.setValue('');
+      // Set initial status to sent
+      updateStatus('sent');
+      // Clear initial filename
+      document.getElementById('filename').textContent = '';
 
       // Track editor changes
       editor.on('change', function() {
@@ -366,9 +372,31 @@
       // Upload button functionality
       const uploadBtn = document.getElementById('upload-btn');
 
+      // Function to prompt for filename if empty
+      let ensureFilename = function() {
+        const currentFilename = document.getElementById('filename').textContent.trim();
+        if (!currentFilename) {
+          const newFilename = prompt('Entrez le nom du fichier:', 'edit.bas');
+          if (newFilename) {
+            document.getElementById('filename').textContent = newFilename;
+            return newFilename;
+          } else {
+            return null;
+          }
+        }
+        return currentFilename;
+      };
+
       // Function to upload code if needed
       let uploadCode = function() {
         return new Promise((resolve, reject) => {
+          // Ensure filename is set
+          const filename = ensureFilename();
+          if (!filename) {
+            reject();
+            return;
+          }
+
           const status = document.getElementById('status-text').textContent;
 
           // If already sent, no need to upload
@@ -377,7 +405,6 @@
             return;
           }
 
-          const filename = document.getElementById('filename').value || 'edit.bas';
           let code = editor.getValue();
           // Add trailing newline if not present
           if (!code.endsWith('\n')) {
@@ -417,6 +444,12 @@
       const runBtn = document.getElementById('run-btn');
       runBtn.addEventListener('click', async function() {
         try {
+          // Ensure filename is set
+          const filename = ensureFilename();
+          if (!filename) {
+            return;
+          }
+
           // Upload code if modified
           await uploadCode();
 
@@ -424,10 +457,10 @@
           showMinitelTab();
 
           // Get the filename
-          const filename = document.getElementById('filename').textContent || 'edit.bas';
+          const runFilename = document.getElementById('filename').textContent || 'edit.bas';
 
           // Create the run command string with newline
-          const runCommand = `run"${filename}"\n`;
+          const runCommand = `run"${runFilename}"\n`;
 
           // Wait a bit for tab switch animation
           setTimeout(() => {
@@ -437,6 +470,42 @@
 
         } catch (error) {
           // Error already handled in uploadCode()
+        }
+      });
+
+      // New button functionality
+      const newBtn = document.getElementById('new-btn');
+      newBtn.addEventListener('click', function() {
+        const status = document.getElementById('status-text').textContent;
+
+        // Helper function to clear editor
+        const clearEditor = function() {
+          editor.setValue('');
+          document.getElementById('filename').textContent = '';
+          updateStatus('sent');
+        };
+
+        if (status === 'Modifié') {
+          // Ask user for confirmation if status is modified
+          const confirmed = confirm('Le fichier a été modifié. Voulez-vous le télécharger avant d\'effacer ?\n\n[OK] Télécharger & Effacer\n[Annuler] Juste Effacer');
+          if (confirmed) {
+            // Upload before clearing
+            uploadCode().then(() => {
+              clearEditor();
+            }).catch(() => {
+              // If upload fails, still ask if user wants to clear
+              const clearAnyway = confirm('L\'upload a échoué. Effacer quand même ?');
+              if (clearAnyway) {
+                clearEditor();
+              }
+            });
+          } else {
+            // Just clear without uploading
+            clearEditor();
+          }
+        } else {
+          // If status is already 'Envoyé', just clear
+          clearEditor();
         }
       });
 
@@ -525,8 +594,8 @@
             editor.setValue(content);
             // Update filename display
             document.getElementById('filename').textContent = filename;
-            // Reset status to modified
-            updateStatus('modified');
+            // Set status to sent (file from disk)
+            updateStatus('sent');
             // Switch to editor tab
             showEditorTab();
           })
