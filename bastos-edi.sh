@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [[ -d bin ]]; then
+    export PATH=$PATH:$(realpath bin)
+fi
+
 cleanup() {
     # try to find websocat listening on port 1967 and kill it
     if command -v lsof >/dev/null 2>&1; then
