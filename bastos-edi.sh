@@ -15,5 +15,5 @@ cleanup() {
 
 trap cleanup EXIT INT TERM
 
-websocat -t -E --no-line ws-l:127.0.0.1:1967 exec:bin/bastos &
+websocat -t -E --no-line ws-l:127.0.0.1:1967 exec:bastos &
 ./bastos-edi.py
