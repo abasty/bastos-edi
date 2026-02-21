@@ -466,8 +466,8 @@
 
             links.forEach(link => {
               const href = link.getAttribute('href');
-              // Filter out parent directory and other navigation links
-              if (href && href !== '/' && href !== '../' && !href.startsWith('?') && href !== '') {
+              // Filter out parent directory and other navigation links, only include .txt and .bas files
+              if (href && href !== '/' && href !== '../' && !href.startsWith('?') && href !== '' && (href.endsWith('.txt') || href.endsWith('.bas'))) {
                 const filename = href.replace(/\/$/, ''); // Remove trailing slash
                 if (filename && !files.includes(filename)) {
                   files.push(filename);
