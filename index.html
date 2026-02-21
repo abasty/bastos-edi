@@ -100,6 +100,18 @@
         font-size: 12px;
         min-width: 150px;
       }
+      .bottombar input[readonly] {
+        background-color: #444;
+        color: #ccc;
+        cursor: default;
+        border: 1px solid #555;
+      }
+      .filename-display {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
       .bottombar button {
         padding: 8px 16px;
         background-color: #4CAF50;
@@ -123,14 +135,12 @@
         width: 100% !important;
       }
       .status-display {
-        margin-left: auto;
         display: flex;
         align-items: center;
         gap: 8px;
         color: white;
         font-family: Arial, sans-serif;
         font-size: 14px;
-        padding-right: 10px;
       }
       .status-icon {
         display: inline-block;
@@ -175,15 +185,16 @@
           <div id="code-editor"></div>
         </div>
         <div class="bottombar">
-          <label for="filename">Nom de fichier :</label>
-          <input type="text" id="filename" value="edit.bas" />
           <button id="open-btn">Ouvrir...</button>
           <button id="upload-btn">Envoyer</button>
           <button id="run-btn">Exécuter...</button>
           <input type="file" id="file-input" style="display: none;" accept=".bas,.txt" />
-          <div class="status-display">
-            <span class="status-icon modified"></span>
-            <span id="status-text">Modifié</span>
+          <div class="filename-display">
+            <span id="filename" style="color: white; font-family: Arial, sans-serif; font-size: 12px; font-weight: bold;">edit.bas</span>
+            <div class="status-display">
+              <span class="status-icon modified"></span>
+              <span id="status-text">Modifié</span>
+            </div>
           </div>
         </div>
       </div>
@@ -339,8 +350,8 @@
           reader.onload = function(e) {
             // Load file content into editor
             editor.setValue(e.target.result);
-            // Update filename field
-            document.getElementById('filename').value = file.name;
+            // Update filename display
+            document.getElementById('filename').textContent = file.name;
           };
           reader.onerror = function() {
             alert('Erreur lors de la lecture du fichier');
@@ -372,7 +383,9 @@
             code += '\n';
           }
 
-          fetch(`/bastos/${filename}`, {
+          // Use the display filename
+          const displayFilename = document.getElementById('filename').textContent;
+          fetch(`/bastos/${displayFilename}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'text/plain'
@@ -410,7 +423,7 @@
           showMinitelTab();
 
           // Get the filename
-          const filename = document.getElementById('filename').value || 'edit.bas';
+          const filename = document.getElementById('filename').textContent || 'edit.bas';
 
           // Create the run command string with newline
           const runCommand = `run"${filename}"\n`;
