@@ -79,6 +79,54 @@ class BastosEDIHandler(http.server.SimpleHTTPRequestHandler):
         else:
             self.send_error(404, "Not found")
 
+    def do_DELETE(self):
+        """Handle DELETE requests to remove files."""
+        parsed_path = urlparse(self.path)
+
+        if parsed_path.path.startswith('/bastos/'):
+            # Extract filename from URL
+            filename = parsed_path.path[len('/bastos/'):]
+
+            if not filename:
+                self.send_error(400, "Filename is required")
+                return
+
+            # Prevent directory traversal
+            if '..' in filename or filename.startswith('/'):
+                self.send_error(400, "Invalid filename")
+                return
+
+            try:
+                # Construct file path
+                file_path = os.path.join(DISK_FOLDER, filename)
+
+                # Check if file exists
+                if not os.path.exists(file_path):
+                    self.send_error(404, "File not found")
+                    return
+
+                # Delete the file
+                os.remove(file_path)
+
+                # Send success response
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+
+                response = {
+                    'status': 'success',
+                    'message': f'File {filename} deleted successfully'
+                }
+                self.wfile.write(json.dumps(response).encode())
+                print(f"✓ File deleted: {file_path}")
+
+            except Exception as e:
+                self.send_error(500, f"Error deleting file: {str(e)}")
+                print(f"✗ Error deleting file: {str(e)}")
+        else:
+            self.send_error(404, "Not found")
+
     def do_GET(self):
         """Handle GET requests for serving static files."""
         # Serve index.html for root path
