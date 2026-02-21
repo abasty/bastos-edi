@@ -154,6 +154,78 @@
       .status-icon.sent {
         background-color: #4CAF50;
       }
+      .files-list-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .file-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px;
+        background-color: #444;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+        gap: 10px;
+      }
+      .file-item:hover {
+        background-color: #555;
+      }
+      .file-name {
+        flex: 1;
+        color: #4CAF50;
+        cursor: pointer;
+        text-decoration: none;
+        font-family: monospace;
+        font-size: 14px;
+        word-break: break-all;
+        transition: color 0.3s;
+      }
+      .file-name:hover {
+        color: #45a049;
+      }
+      .file-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .file-action-btn {
+        padding: 6px 10px;
+        background-color: #555;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+      }
+      .file-action-btn:hover {
+        background-color: #666;
+      }
+      .file-action-btn.edit {
+        background-color: #2196F3;
+      }
+      .file-action-btn.edit:hover {
+        background-color: #0b7dda;
+      }
+      .file-action-btn.delete {
+        background-color: #f44336;
+      }
+      .file-action-btn.delete:hover {
+        background-color: #da190b;
+      }
+      .file-action-btn.run {
+        background-color: #4CAF50;
+      }
+      .file-action-btn.run:hover {
+        background-color: #45a049;
+      }
     </style>
   </head>
   <body>
@@ -238,6 +310,25 @@
       <div style="display: flex; gap: 10px; justify-content: flex-end;">
         <button id="upload-failed-cancel" style="padding: 8px 16px; background-color: #666; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">Annuler</button>
         <button id="upload-failed-clear" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">Effacer</button>
+      </div>
+    </dialog>
+
+    <!-- Delete confirmation dialog -->
+    <dialog id="delete-confirm-dialog" style="border: none; border-radius: 8px; background-color: #333; color: white; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+      <h2 style="margin-top: 0; margin-bottom: 15px;">Supprimer le fichier</h2>
+      <p style="margin-bottom: 20px;" id="delete-confirm-message">Êtes-vous sûr de vouloir supprimer ce fichier ?</p>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="delete-confirm-cancel" style="padding: 8px 16px; background-color: #666; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">Annuler</button>
+        <button id="delete-confirm-ok" style="padding: 8px 16px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">Supprimer</button>
+      </div>
+    </dialog>
+
+    <!-- Delete error dialog -->
+    <dialog id="delete-error-dialog" style="border: none; border-radius: 8px; background-color: #333; color: white; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+      <h2 style="margin-top: 0; margin-bottom: 15px;">Erreur de suppression</h2>
+      <p style="margin-bottom: 20px;" id="delete-error-message">Une erreur s'est produite lors de la suppression du fichier.</p>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="delete-error-ok" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">OK</button>
       </div>
     </dialog>
 
@@ -676,33 +767,141 @@
             // Sort files alphabetically
             files.sort();
 
-            // Build HTML for file list
-            let fileListHtml = '';
+            // Build HTML for file list with new layout
+            let fileListHtml = '<div class="files-list-container">';
             files.forEach(file => {
-              fileListHtml += `<a href="#" data-filename="${file}" style="display: block; color: #4CAF50; text-decoration: none; padding: 8px 0; cursor: pointer; transition: color 0.3s;">${file}</a>`;
+              fileListHtml += `
+                <div class="file-item">
+                  <div class="file-name" data-filename="${file}">${file}</div>
+                  <div class="file-actions">
+                    <button class="file-action-btn edit" title="Éditer" data-filename="${file}" data-action="edit">✎</button>
+                    <button class="file-action-btn run" title="Exécuter" data-filename="${file}" data-action="run">▶</button>
+                    <button class="file-action-btn delete" title="Supprimer" data-filename="${file}" data-action="delete">🗑</button>
+                  </div>
+                </div>
+              `;
             });
+            fileListHtml += '</div>';
             filesList.innerHTML = fileListHtml;
 
-            // Add click handlers to file links
-            filesList.querySelectorAll('a').forEach(link => {
+            // Add click handlers to file names and edit buttons
+            filesList.querySelectorAll('.file-name').forEach(link => {
               link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const filename = this.getAttribute('data-filename');
                 downloadAndLoadFile(filename);
               });
-              link.addEventListener('mouseover', function() {
-                this.style.color = '#45a049';
-                this.style.textDecoration = 'underline';
+            });
+
+            filesList.querySelectorAll('[data-action="edit"]').forEach(btn => {
+              btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const filename = this.getAttribute('data-filename');
+                downloadAndLoadFile(filename);
               });
-              link.addEventListener('mouseout', function() {
-                this.style.color = '#4CAF50';
-                this.style.textDecoration = 'none';
+            });
+
+            // Add click handlers to run buttons
+            filesList.querySelectorAll('[data-action="run"]').forEach(btn => {
+              btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const filename = this.getAttribute('data-filename');
+                runFileFromFilesList(filename);
+              });
+            });
+
+            // Add click handlers to delete buttons
+            filesList.querySelectorAll('[data-action="delete"]').forEach(btn => {
+              btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const filename = this.getAttribute('data-filename');
+                showDeleteConfirmDialog(filename);
               });
             });
           })
           .catch(error => {
             filesList.innerHTML = `<p style="color: #ff6b6b;">Erreur lors du chargement des fichiers: ${error.message}</p>`;
           });
+      }
+
+      function showDeleteConfirmDialog(filename) {
+        const dialog = document.getElementById('delete-confirm-dialog');
+        const message = document.getElementById('delete-confirm-message');
+        const cancelBtn = document.getElementById('delete-confirm-cancel');
+        const okBtn = document.getElementById('delete-confirm-ok');
+
+        message.textContent = `Êtes-vous sûr de vouloir supprimer "${filename}" ?`;
+
+        const handleCancel = () => {
+          dialog.close();
+        };
+
+        const handleDelete = () => {
+          dialog.close();
+          deleteFile(filename);
+        };
+
+        cancelBtn.addEventListener('click', handleCancel);
+        okBtn.addEventListener('click', handleDelete);
+
+        dialog.showModal();
+
+        // Cleanup listeners when dialog closes
+        dialog.addEventListener('close', () => {
+          cancelBtn.removeEventListener('click', handleCancel);
+          okBtn.removeEventListener('click', handleDelete);
+        }, { once: true });
+      }
+
+      function deleteFile(filename) {
+        fetch(`/bastos/${filename}`, {
+          method: 'DELETE'
+        })
+          .then(response => {
+            if (response.ok) {
+              // File deleted successfully, reload the list
+              loadFilesList();
+            } else {
+              showDeleteErrorDialog(`Erreur ${response.status}: ${response.statusText}`);
+            }
+          })
+          .catch(error => {
+            showDeleteErrorDialog(error.message);
+          });
+      }
+
+      function showDeleteErrorDialog(errorMessage) {
+        const dialog = document.getElementById('delete-error-dialog');
+        const message = document.getElementById('delete-error-message');
+        const okBtn = document.getElementById('delete-error-ok');
+
+        message.textContent = `Erreur lors de la suppression du fichier: ${errorMessage}`;
+
+        const handleOk = () => {
+          dialog.close();
+        };
+
+        okBtn.addEventListener('click', handleOk);
+        dialog.showModal();
+
+        // Cleanup listeners when dialog closes
+        dialog.addEventListener('close', () => {
+          okBtn.removeEventListener('click', handleOk);
+        }, { once: true });
+      }
+
+      function runFileFromFilesList(filename) {
+        // Switch to Minitel tab
+        showMinitelTab();
+
+        // Create the run command string with newline
+        const runCommand = `run"${filename}"\n`;
+
+        // Wait a bit for tab switch animation
+        setTimeout(() => {
+          // Send run command through Minitel keyboard
+          sendToMinitelKeyboard(runCommand);
+        }, 200);
       }
 
       function downloadAndLoadFile(filename) {
