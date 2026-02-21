@@ -31,7 +31,35 @@ The container runs with **host network mode**, which means services are directly
 
 ## Quick Start
 
-### Using Docker Compose (Recommended)
+### Using make (Recommended)
+
+```bash
+# Build the Docker image
+make docker
+
+# Start the container
+make run
+
+# View logs
+make logs
+
+# Follow logs in real-time
+make logs-f
+
+# Stop the container
+make stop
+
+# Clean up (stop and remove volumes)
+make clean
+
+# Build and run in one command
+make rebuild
+
+# Show all available commands
+make help
+```
+
+### Using Docker Compose
 
 ```bash
 # Build and start the container
@@ -54,7 +82,7 @@ docker-compose down -v
 docker build -t bastos-edi .
 
 # Run the container (with host network mode)
-docker run -d \
+docker run --rm -d \
   --network host \
   -v bastos-data:/data/bastos \
   --name bastos-edi \

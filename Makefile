@@ -39,7 +39,7 @@ run:
 # Stop the container
 stop:
 	@echo "Stopping container..."
-	@docker compose down --remove-orphans
+	@docker compose down -t1 --remove-orphans
 	@echo "✓ Container stopped"
 
 # View logs
