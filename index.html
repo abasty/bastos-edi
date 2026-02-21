@@ -209,6 +209,38 @@
       </div>
     </div>
 
+    <!-- Filename dialog -->
+    <dialog id="filename-dialog" style="border: none; border-radius: 8px; background-color: #333; color: white; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+      <h2 style="margin-top: 0; margin-bottom: 15px;">Nom du fichier</h2>
+      <p style="margin-bottom: 15px;">Entrez le nom du fichier :</p>
+      <input type="text" id="filename-input" placeholder="edit.bas" value="edit.bas" style="width: 100%; padding: 8px; margin-bottom: 20px; border: 1px solid #555; border-radius: 4px; background-color: #444; color: white; font-family: Arial, sans-serif; box-sizing: border-box;" />
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="filename-cancel" style="padding: 8px 16px; background-color: #666; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">Annuler</button>
+        <button id="filename-ok" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">OK</button>
+      </div>
+    </dialog>
+
+    <!-- New file confirmation dialog -->
+    <dialog id="new-confirm-dialog" style="border: none; border-radius: 8px; background-color: #333; color: white; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+      <h2 style="margin-top: 0; margin-bottom: 15px;">Fichier modifié</h2>
+      <p style="margin-bottom: 20px;">Le fichier a été modifié. Que voulez-vous faire ?</p>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="new-cancel" style="padding: 8px 16px; background-color: #666; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">Annuler</button>
+        <button id="new-clear-only" style="padding: 8px 16px; background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">Juste Effacer</button>
+        <button id="new-upload-clear" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">Télécharger & Effacer</button>
+      </div>
+    </dialog>
+
+    <!-- Upload failed confirmation dialog -->
+    <dialog id="upload-failed-dialog" style="border: none; border-radius: 8px; background-color: #333; color: white; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+      <h2 style="margin-top: 0; margin-bottom: 15px;">Erreur d'upload</h2>
+      <p style="margin-bottom: 20px;">L'upload a échoué. Voulez-vous effacer quand même ?</p>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="upload-failed-cancel" style="padding: 8px 16px; background-color: #666; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">Annuler</button>
+        <button id="upload-failed-clear" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">Effacer</button>
+      </div>
+    </dialog>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/basic/basic.min.js"></script>
     <script src="library/generichelper/generichelper.js"></script>
@@ -372,26 +404,72 @@
       // Upload button functionality
       const uploadBtn = document.getElementById('upload-btn');
 
-      // Function to prompt for filename if empty
+      // Function to prompt for filename if empty using dialog
       let ensureFilename = function() {
-        const currentFilename = document.getElementById('filename').textContent.trim();
-        if (!currentFilename) {
-          const newFilename = prompt('Entrez le nom du fichier:', 'edit.bas');
-          if (newFilename) {
-            document.getElementById('filename').textContent = newFilename;
-            return newFilename;
-          } else {
-            return null;
+        return new Promise((resolve) => {
+          const currentFilename = document.getElementById('filename').textContent.trim();
+          if (currentFilename) {
+            resolve(currentFilename);
+            return;
           }
-        }
-        return currentFilename;
+
+          // Show filename dialog
+          const dialog = document.getElementById('filename-dialog');
+          const input = document.getElementById('filename-input');
+          const cancelBtn = document.getElementById('filename-cancel');
+          const okBtn = document.getElementById('filename-ok');
+
+          // Set focus on input and select text
+          input.focus();
+          input.select();
+
+          // Handle OK button
+          const handleOk = () => {
+            const newFilename = input.value.trim();
+            if (newFilename) {
+              document.getElementById('filename').textContent = newFilename;
+              dialog.close();
+              resolve(newFilename);
+            } else {
+              alert('Le nom du fichier ne peut pas être vide.');
+            }
+          };
+
+          // Handle Cancel button
+          const handleCancel = () => {
+            dialog.close();
+            resolve(null);
+          };
+
+          // Handle Enter key
+          const handleKeyDown = (e) => {
+            if (e.key === 'Enter') {
+              handleOk();
+            } else if (e.key === 'Escape') {
+              handleCancel();
+            }
+          };
+
+          okBtn.addEventListener('click', handleOk);
+          cancelBtn.addEventListener('click', handleCancel);
+          input.addEventListener('keydown', handleKeyDown);
+
+          dialog.showModal();
+
+          // Cleanup listeners when dialog closes
+          dialog.addEventListener('close', () => {
+            okBtn.removeEventListener('click', handleOk);
+            cancelBtn.removeEventListener('click', handleCancel);
+            input.removeEventListener('keydown', handleKeyDown);
+          }, { once: true });
+        });
       };
 
       // Function to upload code if needed
       let uploadCode = function() {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
           // Ensure filename is set
-          const filename = ensureFilename();
+          const filename = await ensureFilename();
           if (!filename) {
             reject();
             return;
@@ -445,7 +523,7 @@
       runBtn.addEventListener('click', async function() {
         try {
           // Ensure filename is set
-          const filename = ensureFilename();
+          const filename = await ensureFilename();
           if (!filename) {
             return;
           }
@@ -486,23 +564,69 @@
         };
 
         if (status === 'Modifié') {
-          // Ask user for confirmation if status is modified
-          const confirmed = confirm('Le fichier a été modifié. Voulez-vous le télécharger avant d\'effacer ?\n\n[OK] Télécharger & Effacer\n[Annuler] Juste Effacer');
-          if (confirmed) {
-            // Upload before clearing
-            uploadCode().then(() => {
-              clearEditor();
-            }).catch(() => {
-              // If upload fails, still ask if user wants to clear
-              const clearAnyway = confirm('L\'upload a échoué. Effacer quand même ?');
-              if (clearAnyway) {
-                clearEditor();
-              }
-            });
-          } else {
-            // Just clear without uploading
+          // Show confirmation dialog
+          const dialog = document.getElementById('new-confirm-dialog');
+          const cancelBtn = document.getElementById('new-cancel');
+          const clearOnlyBtn = document.getElementById('new-clear-only');
+          const uploadClearBtn = document.getElementById('new-upload-clear');
+
+          // Handle Cancel button
+          const handleCancel = () => {
+            dialog.close();
+          };
+
+          // Handle Clear Only button
+          const handleClearOnly = () => {
+            dialog.close();
             clearEditor();
-          }
+          };
+
+          // Handle Upload & Clear button
+          const handleUploadClear = async () => {
+            dialog.close();
+            try {
+              await uploadCode();
+              clearEditor();
+            } catch (error) {
+              // Upload failed, ask if user wants to clear anyway using dialog
+              const failedDialog = document.getElementById('upload-failed-dialog');
+              const failedCancelBtn = document.getElementById('upload-failed-cancel');
+              const failedClearBtn = document.getElementById('upload-failed-clear');
+
+              const handleFailedCancel = () => {
+                failedDialog.close();
+              };
+
+              const handleFailedClear = () => {
+                failedDialog.close();
+                clearEditor();
+              };
+
+              failedCancelBtn.addEventListener('click', handleFailedCancel);
+              failedClearBtn.addEventListener('click', handleFailedClear);
+
+              failedDialog.showModal();
+
+              // Cleanup listeners when dialog closes
+              failedDialog.addEventListener('close', () => {
+                failedCancelBtn.removeEventListener('click', handleFailedCancel);
+                failedClearBtn.removeEventListener('click', handleFailedClear);
+              }, { once: true });
+            }
+          };
+
+          cancelBtn.addEventListener('click', handleCancel);
+          clearOnlyBtn.addEventListener('click', handleClearOnly);
+          uploadClearBtn.addEventListener('click', handleUploadClear);
+
+          dialog.showModal();
+
+          // Cleanup listeners when dialog closes
+          dialog.addEventListener('close', () => {
+            cancelBtn.removeEventListener('click', handleCancel);
+            clearOnlyBtn.removeEventListener('click', handleClearOnly);
+            uploadClearBtn.removeEventListener('click', handleUploadClear);
+          }, { once: true });
         } else {
           // If status is already 'Envoyé', just clear
           clearEditor();
