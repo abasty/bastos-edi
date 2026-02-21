@@ -186,10 +186,8 @@
           <div id="code-editor"></div>
         </div>
         <div class="bottombar">
-          <button id="open-btn">Ouvrir...</button>
           <button id="upload-btn">Envoyer</button>
           <button id="run-btn">Exécuter...</button>
-          <input type="file" id="file-input" style="display: none;" accept=".bas,.txt" />
           <div class="filename-display">
             <span id="filename" style="color: white; font-family: Arial, sans-serif; font-size: 12px; font-weight: bold;">edit.bas</span>
             <div class="status-display">
@@ -364,32 +362,6 @@
           sendNextChar();
         });
       };
-
-      // Open file button functionality
-      const fileInput = document.getElementById('file-input');
-      document.getElementById('open-btn').addEventListener('click', function() {
-        fileInput.click();
-      });
-
-      // Handle file selection
-      fileInput.addEventListener('change', function(event) {
-        const file = event.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            // Load file content into editor
-            editor.setValue(e.target.result);
-            // Update filename display
-            document.getElementById('filename').textContent = file.name;
-          };
-          reader.onerror = function() {
-            alert('Erreur lors de la lecture du fichier');
-          };
-          reader.readAsText(file);
-        }
-        // Reset the file input so the same file can be opened again
-        fileInput.value = '';
-      });
 
       // Upload button functionality
       const uploadBtn = document.getElementById('upload-btn');
