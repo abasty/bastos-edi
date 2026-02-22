@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="css/minitel-keyboard.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/default.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.css" />
 	<meta name="author" content="Alain Basty" />
     <meta name="keywords" content="minitel, vintage, technologie, videotex, basic, programmation" />
     <meta name="description" content="Développez des applications BASTOS (Basic) pour Minitel" />
@@ -232,6 +233,74 @@
       .file-action-btn.run:hover {
         background-color: #45a049;
       }
+      .editor-toolbar {
+        background-color: #f5f5f5;
+        border-bottom: 1px solid #ddd;
+        padding: 8px 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        flex-shrink: 0;
+      }
+      .toolbar-group {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+      }
+      .toolbar-separator {
+        width: 1px;
+        height: 24px;
+        background-color: #ccc;
+        margin: 0 5px;
+      }
+      .toolbar-btn {
+        padding: 6px 12px;
+        background-color: #fff;
+        color: #333;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        font-size: 13px;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      .toolbar-btn:hover {
+        background-color: #e8e8e8;
+        border-color: #999;
+      }
+      .toolbar-btn:active {
+        background-color: #d0d0d0;
+      }
+      .toolbar-btn.active {
+        background-color: #4CAF50;
+        color: white;
+        border-color: #4CAF50;
+      }
+      .toolbar-btn.active:hover {
+        background-color: #45a049;
+      }
+      .toolbar-select {
+        padding: 6px 12px;
+        background-color: #fff;
+        color: #333;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        font-size: 13px;
+        min-width: 120px;
+      }
+      .toolbar-select:hover {
+        border-color: #999;
+      }
+      .toolbar-label {
+        font-family: Arial, sans-serif;
+        font-size: 13px;
+        color: #333;
+        font-weight: 500;
+      }
     </style>
   </head>
   <body>
@@ -261,6 +330,35 @@
       <!-- Code Editor Tab -->
       <div id="editor-view" class="tab-content">
         <div class="code-section">
+          <div class="editor-toolbar">
+            <div class="toolbar-group">
+              <button class="toolbar-btn" id="toolbar-undo" title="Annuler (Ctrl+Z)">↶ Annuler</button>
+              <button class="toolbar-btn" id="toolbar-redo" title="Rétablir (Ctrl+Y)">↷ Rétablir</button>
+            </div>
+            <div class="toolbar-separator"></div>
+            <div class="toolbar-group">
+              <button class="toolbar-btn" id="toolbar-find" title="Rechercher (Ctrl+F)">🔍 Rechercher</button>
+              <button class="toolbar-btn" id="toolbar-replace" title="Remplacer (Ctrl+H)">⇄ Remplacer</button>
+            </div>
+            <div class="toolbar-separator"></div>
+            <div class="toolbar-group">
+              <button class="toolbar-btn" id="toolbar-font-larger" title="Agrandir la police">A+</button>
+              <button class="toolbar-btn" id="toolbar-font-smaller" title="Réduire la police">A-</button>
+            </div>
+            <div class="toolbar-separator"></div>
+            <div class="toolbar-group">
+              <button class="toolbar-btn" id="toolbar-line-numbers" title="Numéros de ligne"># Numéros</button>
+              <button class="toolbar-btn active" id="toolbar-line-wrapping" title="Retour à la ligne automatique">⤢ Retour ligne</button>
+            </div>
+            <div class="toolbar-separator"></div>
+            <div class="toolbar-group">
+              <label class="toolbar-label" for="language-select">Langage:</label>
+              <select id="language-select" class="toolbar-select">
+                <option value="basicmode">Bastos</option>
+                <option value="null">Texte brut</option>
+              </select>
+            </div>
+          </div>
           <div id="code-editor"></div>
         </div>
         <div class="bottombar">
@@ -339,7 +437,10 @@
     </dialog>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/basic/basic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/mode/simple.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/searchcursor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/search.min.js"></script>
     <script src="library/generichelper/generichelper.js"></script>
     <script src="library/import-html/import-html.js"></script>
     <script src="library/autocallback/autocallback.js"></script>
@@ -363,6 +464,34 @@
     <script src="library/minitel/start-emulators.js"></script>
 
     <script src="app/minitel.js"></script>
+
+    <script>
+      // Define custom BASIC syntax highlighting mode
+      CodeMirror.defineSimpleMode("basicmode", {
+        start: [
+          // Line numbers at start
+          {regex: /^\s*\d+/, token: "number"},
+          // Comments (REM)
+          {regex: /\bREM\b.*/, token: "comment", sol: true},
+          {regex: /\bREM\b.*/, token: "comment"},
+          // Strings
+          {regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: "string"},
+          // Keywords
+          {regex: /\b(?:PRINT|INPUT|IF|THEN|ELSE|ELSEIF|ENDIF|FOR|TO|STEP|NEXT|GOTO|GOSUB|RETURN|DIM|LET|END|RUN|LIST|NEW|SAVE|LOAD|DATA|READ|RESTORE|STOP|CONT|CLS|CLEAR|POKE|PEEK|AND|OR|NOT|MOD|ABS|ATN|COS|EXP|INT|LOG|RND|SGN|SIN|SQR|TAN|ASC|CHR\$|LEFT\$|RIGHT\$|MID\$|LEN|STR\$|VAL|TAB|SPC|POS|INKEY\$|GET|PUT|OPEN|CLOSE|ON|OFF|SWAP|WHILE|WEND|DO|LOOP|UNTIL|EXIT|CALL|DEF|FN|SUB|FUNCTION|LOCAL|GLOBAL|OPTION|BASE|RANDOMIZE|TIMER|DRAW|PLOT|LINE|CIRCLE|COLOR|SCREEN|LOCATE|BEEP|SOUND|PLAY|WAIT|SHELL)\b/i, token: "keyword"},
+          // Built-in functions
+          {regex: /\b(?:ABS|ATN|COS|EXP|FIX|INT|LOG|RND|SGN|SIN|SQR|TAN|ASC|CHR\$|INSTR|LCASE\$|LEFT\$|LEN|LTRIM\$|MID\$|RIGHT\$|RTRIM\$|SPACE\$|STR\$|STRING\$|UCASE\$|VAL)\b/i, token: "builtin"},
+          // Numbers
+          {regex: /\b\d+\.?\d*([eE][+-]?\d+)?\b/, token: "number"},
+          // Operators
+          {regex: /[+\-*\/\^=<>&]/, token: "operator"},
+          // Variables
+          {regex: /[a-zA-Z][a-zA-Z0-9]*[$%]?/, token: "variable"},
+        ],
+        meta: {
+          lineComment: "REM"
+        }
+      });
+    </script>
 
     <script>
       // Global variable to track which tab is active
@@ -419,9 +548,9 @@
 
       // Initialize CodeMirror editor
       const editor = CodeMirror(document.getElementById('code-editor'), {
-        mode: 'basic',
+        mode: 'basicmode',
         theme: 'default',
-        lineNumbers: true,
+        lineNumbers: false,
         indentUnit: 4,
         tabSize: 4,
         indentWithTabs: false,
@@ -453,6 +582,73 @@
       // Track editor changes
       editor.on('change', function() {
         updateStatus('modified');
+      });
+
+      // Toolbar functionality
+      let editorFontSize = 14; // Default font size
+
+      // Undo button
+      document.getElementById('toolbar-undo').addEventListener('click', function() {
+        editor.undo();
+        editor.focus();
+      });
+
+      // Redo button
+      document.getElementById('toolbar-redo').addEventListener('click', function() {
+        editor.redo();
+        editor.focus();
+      });
+
+      // Find button
+      document.getElementById('toolbar-find').addEventListener('click', function() {
+        CodeMirror.commands.find(editor);
+      });
+
+      // Replace button
+      document.getElementById('toolbar-replace').addEventListener('click', function() {
+        CodeMirror.commands.replace(editor);
+      });
+
+      // Font size controls
+      function updateEditorFontSize() {
+        const wrapper = editor.getWrapperElement();
+        wrapper.style.fontSize = editorFontSize + 'px';
+        editor.refresh();
+      }
+
+      document.getElementById('toolbar-font-larger').addEventListener('click', function() {
+        if (editorFontSize < 32) {
+          editorFontSize += 2;
+          updateEditorFontSize();
+        }
+      });
+
+      document.getElementById('toolbar-font-smaller').addEventListener('click', function() {
+        if (editorFontSize > 8) {
+          editorFontSize -= 2;
+          updateEditorFontSize();
+        }
+      });
+
+      // Toggle line numbers
+      document.getElementById('toolbar-line-numbers').addEventListener('click', function() {
+        const currentValue = editor.getOption('lineNumbers');
+        editor.setOption('lineNumbers', !currentValue);
+        this.classList.toggle('active');
+      });
+
+      // Toggle line wrapping
+      document.getElementById('toolbar-line-wrapping').addEventListener('click', function() {
+        const currentValue = editor.getOption('lineWrapping');
+        editor.setOption('lineWrapping', !currentValue);
+        this.classList.toggle('active');
+      });
+
+      // Language selector
+      document.getElementById('language-select').addEventListener('change', function() {
+        const selectedMode = this.value;
+        editor.setOption('mode', selectedMode === 'null' ? null : selectedMode);
+        editor.focus();
       });
 
       // Function to send text through Minitel keyboard
