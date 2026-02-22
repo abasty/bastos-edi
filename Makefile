@@ -3,7 +3,6 @@
 # Variables
 IMAGE_NAME := bastos-edi
 CONTAINER_NAME := bastos-edi
-COMPOSE_FILE := docker compose.yml
 
 help:
 	@echo "BASTOS-EDI Makefile Targets"
@@ -22,11 +21,11 @@ help:
 # Build the Docker image
 docker:
 	@echo "Building Docker image: $(IMAGE_NAME)"
-	docker build -t $(IMAGE_NAME) .
+	docker build -t abasty/$(IMAGE_NAME) .
 	@echo "✓ Docker image built successfully"
 
 # Run the container with docker compose
-run:
+start:
 	@echo "Starting BASTOS-EDI backend"
 	@export USER_ID=$$(id -u) && \
 	export GROUP_ID=$$(id -g) && \
@@ -56,6 +55,6 @@ clean:
 	@echo "✓ Cleanup complete"
 
 # Build and run
-rebuild: docker run
+restart: stop docker start
 	@echo ""
 	@echo "✓ Build and run complete!"

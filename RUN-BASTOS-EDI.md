@@ -5,7 +5,7 @@
 À ne faire que la première fois pour initialiser le contexte de lancement du
 conteneur `bastos-edi`.
 
-```
+```bash
 $ mkdir bastos
 $ cd bastos
 $ mkdir disk
@@ -19,13 +19,13 @@ $ docker stop -t1 bastos-init
 
 Depuis le répertoire créé la première fois (`bastos` dans cet exemple) :
 
-```
-$ make run
+```bash
+$ make start
 ```
 
 Pour arrêter le _backend_ :
 
-```
+```bash
 $ make stop
 ```
 
@@ -36,17 +36,17 @@ $ make stop
 Mode application sans bordures :
 
 ```bash
-chromium --app=http://localhost:9000 --start-fullscreen --new-window
+$ chromium --app=http://localhost:9000 --start-fullscreen --new-window
 ```
 
 Ou avec Google Chrome :
 
 ```bash
-google-chrome --app=http://localhost:9000 --start-fullscreen --new-window
+$ google-chrome --app=http://localhost:9000 --start-fullscreen --new-window
 ```
 
 ## Firefox (Plein écran)
 
 ```bash
-firefox --kiosk http://localhost:9000
+$ firefox --kiosk http://localhost:9000
 ```

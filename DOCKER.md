@@ -17,8 +17,6 @@ The container runs with **host network mode**, which means services are directly
 ### FTP Server (vsftpd)
 - **Port:** 2121
 - **Authentication:** Anonymous login only
-- **Access:** Read/Write to `/data/bastos` folder
-- **Passive Mode:** Ports 30000-30100
 
 ### Web Server (BASTOS-EDI SPA)
 - **Port:** 9000
@@ -27,7 +25,8 @@ The container runs with **host network mode**, which means services are directly
 
 ### WebSocket Server (WebSocat)
 - **Port:** 1967 (internal only, linked to BASTOS)
-- **Purpose:** Real-time communication between SPA and Minitel emulator
+- **Purpose:** Real-time communication between Minitel emulator and BASTOS
+  binary
 
 ## Quick Start
 
@@ -38,7 +37,7 @@ The container runs with **host network mode**, which means services are directly
 make docker
 
 # Start the container
-make run
+make start
 
 # View logs
 make logs
@@ -52,8 +51,8 @@ make stop
 # Clean up (stop and remove volumes)
 make clean
 
-# Build and run in one command
-make rebuild
+# Stop, build and run in one command
+make restart
 
 # Show all available commands
 make help
@@ -78,15 +77,11 @@ docker-compose down -v
 ### Using Docker directly
 
 ```bash
-# Build the image
-docker build -t bastos-edi .
-
 # Run the container (with host network mode)
 docker run --rm -d \
   --network host \
-  -v bastos-data:/data/bastos \
   --name bastos-edi \
-  bastos-edi
+  abasty/bastos-edi
 ```
 
 **Note:** The `--network host` flag is used to match the docker-compose configuration, allowing services to run directly on the host's network interface.
