@@ -336,6 +336,13 @@
         <div class="code-section">
           <div class="editor-toolbar">
             <div class="toolbar-group">
+              <select id="language-select" class="toolbar-select">
+                <option value="basicmode">Bastos</option>
+                <option value="null">Texte brut</option>
+              </select>
+            </div>
+            <div class="toolbar-separator"></div>
+            <div class="toolbar-group">
               <button class="toolbar-btn" id="toolbar-undo" title="Annuler (Ctrl+Z)">↶ Annuler</button>
               <button class="toolbar-btn" id="toolbar-redo" title="Rétablir (Ctrl+Y)">↷ Rétablir</button>
             </div>
@@ -365,14 +372,6 @@
             <div class="toolbar-group">
               <button class="toolbar-btn" id="toolbar-line-numbers" title="Numéros de ligne"># Numéros</button>
               <button class="toolbar-btn active" id="toolbar-line-wrapping" title="Retour à la ligne automatique">⤢ Retour ligne</button>
-            </div>
-            <div class="toolbar-separator"></div>
-            <div class="toolbar-group">
-              <label class="toolbar-label" for="language-select">Langage:</label>
-              <select id="language-select" class="toolbar-select">
-                <option value="basicmode">Bastos</option>
-                <option value="null">Texte brut</option>
-              </select>
             </div>
           </div>
           <div id="code-editor"></div>
