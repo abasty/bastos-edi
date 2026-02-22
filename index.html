@@ -347,6 +347,10 @@
             </div>
             <div class="toolbar-separator"></div>
             <div class="toolbar-group">
+              <button class="toolbar-btn" id="toolbar-format" title="Formater le code (Mots-clés en MAJUSCULES, variables en minuscules)">📝 Formater</button>
+            </div>
+            <div class="toolbar-separator"></div>
+            <div class="toolbar-group">
               <button class="toolbar-btn" id="toolbar-line-numbers" title="Numéros de ligne"># Numéros</button>
               <button class="toolbar-btn active" id="toolbar-line-wrapping" title="Retour à la ligne automatique">⤢ Retour ligne</button>
             </div>
@@ -642,6 +646,115 @@
         const currentValue = editor.getOption('lineWrapping');
         editor.setOption('lineWrapping', !currentValue);
         this.classList.toggle('active');
+      });
+
+      // Format button - uppercase keywords, lowercase variables
+      document.getElementById('toolbar-format').addEventListener('click', function() {
+        // BASTOS keywords list (same as in syntax highlighter)
+        const keywords = [
+          'PRINT', 'INPUT', 'IF', 'THEN', 'FOR', 'TO', 'STEP', 'NEXT', 'GOTO', 'GOSUB', 'RETURN',
+          'DIM', 'LET', 'END', 'RUN', 'LIST', 'NEW', 'SAVE', 'LOAD', 'STOP', 'CONT', 'CLS',
+          'CLEAR', 'POKE', 'PEEK', 'AND', 'OR', 'NOT', 'REM', 'GET', 'PUT', 'CAT', 'ERASE',
+          'RESET', 'AT', 'INK', 'PAPER', 'CURSOR', 'FAST', 'SLOW', 'FREE', 'RAND', 'PAUSE',
+          'TAB', 'SCROLL', 'PLOT', 'UNPLOT', 'TEST', 'MODE', 'WIFI', 'START', 'USR', 'BASTOS',
+          'SCAN', 'STATUS', 'FTP', 'MINITEL', 'DB', 'DOWN', 'UP', 'DEBUG', 'OUTPUT', 'BEEP',
+          'CLEOL', 'LINE0', 'FLASH', 'INVERSE', 'UNDERLINE', 'ECHO', 'SIZE', 'EDIT', 'DEL',
+          'INS', 'LINE', 'CHAR', 'FAST2', 'LL', 'G0', 'G1', 'ORIGIN', 'VKEY', 'INDEX', 'FILE',
+          'CODE', 'BIN', 'ABS', 'ACS', 'ASN', 'ATN', 'COS', 'EXP', 'INT', 'LN', 'PI', 'RND',
+          'SGN', 'SIN', 'SQR', 'TAN', 'CHR$', 'STR$', 'LEN', 'INKEY$', 'VAL', 'REP$'
+        ];
+
+        const keywordSet = new Set(keywords.map(k => k.toUpperCase()));
+
+        let code = editor.getValue();
+        const lines = code.split('\n');
+        const formattedLines = [];
+
+        for (let line of lines) {
+          // Split line into tokens, preserving strings and comments
+          let formattedLine = '';
+          let inString = false;
+          let inComment = false;
+          let currentToken = '';
+
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            const prevChar = i > 0 ? line[i - 1] : '';
+
+            // Handle strings
+            if (char === '"' && prevChar !== '\\') {
+              if (currentToken) {
+                formattedLine += formatToken(currentToken, keywordSet, inComment);
+                currentToken = '';
+              }
+              formattedLine += char;
+              inString = !inString;
+              continue;
+            }
+
+            if (inString) {
+              formattedLine += char;
+              continue;
+            }
+
+            // Handle REM comments
+            if (!inComment && currentToken.toUpperCase() === 'REM' && (char === ' ' || char === '\t')) {
+              formattedLine += 'REM';
+              formattedLine += line.substring(i); // Rest of line is comment
+              currentToken = ''; // Clear token to avoid adding it again after break
+              inComment = true;
+              break;
+            }
+
+            // Check if character is part of identifier (letter, digit, $, %)
+            if (/[a-zA-Z0-9$%]/.test(char)) {
+              currentToken += char;
+            } else {
+              // End of token
+              if (currentToken) {
+                formattedLine += formatToken(currentToken, keywordSet, inComment);
+                currentToken = '';
+              }
+              formattedLine += char;
+            }
+          }
+
+          // Handle remaining token
+          if (currentToken) {
+            formattedLine += formatToken(currentToken, keywordSet, inComment);
+          }
+
+          formattedLines.push(formattedLine);
+        }
+
+        function formatToken(token, keywordSet, inComment) {
+          if (inComment) return token;
+
+          // Check if it's a number
+          if (/^\d+$/.test(token)) {
+            return token;
+          }
+
+          // Check if it's a keyword
+          const upperToken = token.toUpperCase();
+          if (keywordSet.has(upperToken)) {
+            return upperToken;
+          }
+
+          // It's a variable - lowercase it (but preserve $ and % suffixes)
+          return token.toLowerCase();
+        }
+
+        // Set the formatted code
+        const cursorPos = editor.getCursor();
+        editor.setValue(formattedLines.join('\n'));
+        editor.setCursor(cursorPos);
+        editor.focus();
+
+        // Mark as modified if content changed
+        if (code !== formattedLines.join('\n')) {
+          updateStatus('modified');
+        }
       });
 
       // Language selector
