@@ -7,9 +7,9 @@
 * On édite des scripts ou programme BASTOS sur son PC host et on les sauve sur
   le disque partagé BASTOS entre host et conteneur
 * On accède à un émulateur depuis un navigateur sur le PC hôte par une URL
-  mappée sur un service du conteneur (genre "localhost:1967") => l'émulateur
-  minitel servi par le conteneur se connecte sur une websocket locale au
-  conteneur qui sert BASTOS
+  mappée sur un service du conteneur (genre "http://localhost:9000") =>
+  l'émulateur minitel servi par le conteneur se connecte sur une websocket
+  locale qui sert BASTOS
 
 ## Docker émulateur BASTOS
 
@@ -20,13 +20,14 @@
 * [x] ATTENTION : Certaines touches ne marchenet pas : Ctrl+Enter (as CLS), DEL
   (as Correction), ESC-ESC pour **break**, flêches clavier, ctrl+G est pris par
   l'UI, Ctrl+A selctionne tout, Cx/Fin agit bizarrement, autres ?
-* emuljs, basé sur MiEdit, pourrait intégrer un éditeur de basic
-  <https://ace.c9.io/> et MiEdit lui-meme (avec conversion vers code ou variable
-  BASTOS)
-* Connexion au réseau (pour emul WIFI et commande MINITEL)
-* Un répertoire partagé pour le disque BASTOS websocket
-* Au démarrage de docker on lance le service web qui sert l'émulateur et le
+* [x] Intégrer un éditeur de basic (pour l'instant CodeMirror, mais voir avec
+  <https://ace.c9.io/>)
+* [x] Un répertoire partagé pour le disque BASTOS websocket
+* [x] Au démarrage de docker on lance le service web qui sert l'émulateur et le
   service BASTOS en websocket
+* [x] Connexion au réseau (pour emul WIFI et commande MINITEL)
+* [ ] MiEdit lui-même (avec conversion vers code ou variable BASTOS) pour créer
+  des pages videotex accessibles depuis BASTOS avec la commande `FILE`
 
 ## Machine hôte
 
@@ -61,7 +62,7 @@
 * Réponse au GET
 * Rust benchmark IO asynchrones : <https://github.com/jkarneges/rust-async-bench>
 
-# BASTOS sur websocat
+# websocat
 
 ```
 wget -qO websocat https://github.com/vi/websocat/releases/latest/download/websocat.x86_64-unknown-linux-musl
