@@ -1,9 +1,16 @@
-# Configuration requise
+# Remarques préliminaires
 
-Docker doit être installé et doit pouvoir exécuter des conteneurs Linux.
-
-Uniquement testé sur Debian 13.3. L'image Docker `bastos-edi` est basée sur
-`debian:13-slim`.
+- Docker doit être installé et doit pouvoir exécuter des conteneurs Linux. Le
+  _launcher_ BASTOS-EDI utilise `docker compose`
+- Uniquement testé sur Debian 13.3. L'image Docker `bastos-edi` est basée sur
+  `debian:13-slim`
+- Le simulateur BASTOS sur x86 ne supporte pas encore les connexions WebSockets
+  ni les connexions FTP. Il est uniquement possible de se connecter sur des
+  sites TCP/TELNET, sans surcouche HTTP / WebSockets
+- Lire `MANUAL.md` pour utiliser BASTOS-EDI
+- Pas de documentation BASTOS pour l'instant, il faut lire les exemples :)
+- Le module BASTOS sur esp32 est entièrement compatible avec l'émulateur. Il
+  supporte les connexions FTP et WebSockets
 
 # Installer BASTOS-EDI (image Docker)
 
@@ -78,6 +85,8 @@ $ firefox --kiosk http://localhost:9000
 # Tips pour l'émulateur BASTOS-EDI
 
 - Le mot de passe des réseaux émulés Wi-Fi est `changeme`
+- Le simulateur BASTOS sur x86 ne supporte pas encore les connexions WebSockets
+  ni les connexions FTP
 - Pour sortir d'un programme BASTOS en exécution ou du mode connecté, **appuyer 2
   fois sur la touche ESC** (Emprunté aux Amstrad CPC)
 - Si on est bloqué dans l'émulateur ou si on n'arrive pas à reprendre la main,
