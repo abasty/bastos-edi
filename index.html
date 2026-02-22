@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="css/minitel-keyboard.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/default.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.css" />
 	<meta name="author" content="Alain Basty" />
     <meta name="keywords" content="minitel, vintage, technologie, videotex, basic, programmation" />
@@ -237,8 +238,8 @@
         background-color: #45a049;
       }
       .editor-toolbar {
-        background-color: #f5f5f5;
-        border-bottom: 1px solid #ddd;
+        background-color: #333;
+        border-bottom: 1px solid #555;
         padding: 8px 10px;
         display: flex;
         align-items: center;
@@ -259,9 +260,9 @@
       }
       .toolbar-btn {
         padding: 6px 12px;
-        background-color: #fff;
-        color: #333;
-        border: 1px solid #ccc;
+        background-color: #a4943c;
+        color: #fff;
+        border: 1px solid #8b7a2e;
         border-radius: 3px;
         cursor: pointer;
         font-family: Arial, sans-serif;
@@ -270,11 +271,11 @@
         white-space: nowrap;
       }
       .toolbar-btn:hover {
-        background-color: #e8e8e8;
-        border-color: #999;
+        background-color: #b8a84a;
+        border-color: #9e8d3a;
       }
       .toolbar-btn:active {
-        background-color: #d0d0d0;
+        background-color: #8b7a2e;
       }
       .toolbar-btn.active {
         background-color: #4CAF50;
@@ -286,9 +287,9 @@
       }
       .toolbar-select {
         padding: 6px 12px;
-        background-color: #fff;
-        color: #333;
-        border: 1px solid #ccc;
+        background-color: #a4943c;
+        color: #fff;
+        border: 1px solid #8b7a2e;
         border-radius: 3px;
         cursor: pointer;
         font-family: Arial, sans-serif;
@@ -301,7 +302,7 @@
       .toolbar-label {
         font-family: Arial, sans-serif;
         font-size: 13px;
-        color: #333;
+        color: #fff;
         font-weight: 500;
       }
     </style>
@@ -342,6 +343,10 @@
             <div class="toolbar-group">
               <button class="toolbar-btn" id="toolbar-find" title="Rechercher (Ctrl+F)">🔍 Rechercher</button>
               <button class="toolbar-btn" id="toolbar-replace" title="Remplacer (Ctrl+H)">⇄ Remplacer</button>
+            </div>
+            <div class="toolbar-separator"></div>
+            <div class="toolbar-group">
+              <button class="toolbar-btn active" id="toolbar-theme-toggle" title="Basculer entre thème clair et sombre">☀️ Clair</button>
             </div>
             <div class="toolbar-separator"></div>
             <div class="toolbar-group">
@@ -560,7 +565,7 @@
       // Initialize CodeMirror editor
       const editor = CodeMirror(document.getElementById('code-editor'), {
         mode: 'basicmode',
-        theme: 'default',
+        theme: 'monokai',
         lineNumbers: false,
         indentUnit: 4,
         tabSize: 4,
@@ -598,6 +603,28 @@
       // Toolbar functionality
       let editorFontSize = 14; // Default font size
       let useMinitelFont = true; // Default to Minitel font
+      let darkTheme = true; // Default to dark theme
+
+      // Theme toggle button
+      document.getElementById('toolbar-theme-toggle').addEventListener('click', function() {
+        darkTheme = !darkTheme;
+
+        if (darkTheme) {
+          editor.setOption('theme', 'monokai');
+          this.classList.remove('active');
+          this.textContent = '🌙 Sombre';
+        } else {
+          editor.setOption('theme', 'default');
+          this.classList.add('active');
+          this.textContent = '☀️ Clair';
+        }
+
+        editor.focus();
+      });
+
+      // Update initial button state to reflect dark theme is default
+      document.getElementById('toolbar-theme-toggle').classList.remove('active');
+      document.getElementById('toolbar-theme-toggle').textContent = '🌙 Sombre';
 
       // Font toggle button
       document.getElementById('toolbar-font-toggle').addEventListener('click', function() {
