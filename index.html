@@ -1220,7 +1220,15 @@
       }
 
       function downloadAndLoadFile(filename) {
-        fetch(`http://localhost:9000/disk/${filename}`)
+        // Add cache-busting parameter with current timestamp to force fresh fetch
+        const cacheParam = new Date().getTime();
+        fetch(`http://localhost:9000/disk/${filename}?cache=${cacheParam}`, {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        })
           .then(response => {
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
