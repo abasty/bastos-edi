@@ -83,7 +83,7 @@
         flex-direction: column;
         min-width: 0;
         min-height: 0;
-        height: 100%;
+        overflow: hidden;
       }
       .bottombar {
         background-color: #333;
@@ -135,7 +135,8 @@
       }
       #code-editor {
         flex: 1;
-        height: 100%;
+        min-height: 0;
+        overflow: hidden;
       }
       .CodeMirror {
         height: 100% !important;
