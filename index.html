@@ -141,6 +141,8 @@
       .CodeMirror {
         height: 100% !important;
         width: 100% !important;
+        font-family: 'Minitel', monospace !important;
+        font-size: 14px !important;
       }
       .status-display {
         display: flex;
@@ -340,6 +342,10 @@
             <div class="toolbar-group">
               <button class="toolbar-btn" id="toolbar-find" title="Rechercher (Ctrl+F)">🔍 Rechercher</button>
               <button class="toolbar-btn" id="toolbar-replace" title="Remplacer (Ctrl+H)">⇄ Remplacer</button>
+            </div>
+            <div class="toolbar-separator"></div>
+            <div class="toolbar-group">
+              <button class="toolbar-btn active" id="toolbar-font-toggle" title="Basculer entre police Minitel et monospace">🔤 Minitel</button>
             </div>
             <div class="toolbar-separator"></div>
             <div class="toolbar-group">
@@ -591,6 +597,43 @@
 
       // Toolbar functionality
       let editorFontSize = 14; // Default font size
+      let useMinitelFont = true; // Default to Minitel font
+
+      // Font toggle button
+      document.getElementById('toolbar-font-toggle').addEventListener('click', function() {
+        useMinitelFont = !useMinitelFont;
+        const wrapper = editor.getWrapperElement();
+
+        if (useMinitelFont) {
+          wrapper.style.fontFamily = "'Minitel', monospace";
+          // Apply to CodeMirror internal elements
+          const style = document.createElement('style');
+          style.id = 'minitel-font-style';
+          if (document.getElementById('minitel-font-style')) {
+            document.getElementById('minitel-font-style').remove();
+          }
+          style.textContent = `.CodeMirror { font-family: 'Minitel', monospace !important; }`;
+          document.head.appendChild(style);
+          this.classList.add('active');
+          this.textContent = '🔤 Minitel';
+        } else {
+          wrapper.style.fontFamily = "'Courier New', monospace";
+          // Remove Minitel font style and apply Courier New
+          const existingStyle = document.getElementById('minitel-font-style');
+          if (existingStyle) {
+            existingStyle.remove();
+          }
+          const style = document.createElement('style');
+          style.id = 'courier-font-style';
+          style.textContent = `.CodeMirror { font-family: 'Courier New', monospace !important; }`;
+          document.head.appendChild(style);
+          this.classList.remove('active');
+          this.textContent = '🔤 Courier';
+        }
+
+        editor.refresh();
+        editor.focus();
+      });
 
       // Undo button
       document.getElementById('toolbar-undo').addEventListener('click', function() {
@@ -616,8 +659,18 @@
 
       // Font size controls
       function updateEditorFontSize() {
-        const wrapper = editor.getWrapperElement();
-        wrapper.style.fontSize = editorFontSize + 'px';
+        // Remove old font size style if it exists
+        const existingStyle = document.getElementById('editor-fontsize-style');
+        if (existingStyle) {
+          existingStyle.remove();
+        }
+
+        // Create new dynamic CSS style with !important to override CodeMirror
+        const style = document.createElement('style');
+        style.id = 'editor-fontsize-style';
+        style.textContent = `.CodeMirror { font-size: ${editorFontSize}px !important; }`;
+        document.head.appendChild(style);
+
         editor.refresh();
       }
 
