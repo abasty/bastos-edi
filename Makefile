@@ -27,18 +27,17 @@ docker:
 
 # Run the container with docker compose
 run:
-	@echo "Starting container with docker compose..."
-	@docker compose up -d
+	@echo "Starting BASTOS-EDI backend"
+	@export USER_ID=$$(id -u) && \
+	export GROUP_ID=$$(id -g) && \
+	docker compose up -d
 	@sleep 1
 	@docker compose logs
-# 	@echo "✓ Container started successfully"
-# 	@echo ""
-# 	@echo "Access the BASTOS-EDI SPA at: http://localhost:9000"
-# 	@echo "FTP access: ftp://localhost:2121 (anonymous login)"
+	@echo "✓ Container started"
 
 # Stop the container
 stop:
-	@echo "Stopping container..."
+	@echo "Stopping BASTOS-EDI backend"
 	@docker compose down -t1 --remove-orphans
 	@echo "✓ Container stopped"
 

@@ -3,7 +3,10 @@ services:
     image: bastos-edi
     container_name: bastos-edi
     network_mode: "host"
+    user: "${USER_ID:-1000}:${GROUP_ID:-1000}"
     volumes:
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
       - bastos-data:/data/bastos
       - ./disk:/app/disk
     environment:

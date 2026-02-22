@@ -61,4 +61,8 @@ RUN mkdir -p /app/disk && chmod 777 /app/disk
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+# Host files
+RUN mkdir -p /opt/host
+COPY Makefile docker-compose.yml /opt/host/
+
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
