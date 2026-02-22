@@ -259,23 +259,25 @@
         margin: 0 5px;
       }
       .toolbar-btn {
-        padding: 6px 12px;
-        background-color: #a4943c;
+        padding: 4px 6px;
+        background-color: #7a7530;
         color: #fff;
-        border: 1px solid #8b7a2e;
+        border: 1px solid #6b6a25;
         border-radius: 3px;
         cursor: pointer;
         font-family: Arial, sans-serif;
         font-size: 13px;
         transition: all 0.2s;
         white-space: nowrap;
+        min-width: 32px;
+        text-align: center;
       }
       .toolbar-btn:hover {
-        background-color: #b8a84a;
-        border-color: #9e8d3a;
+        background-color: #8f8838;
+        border-color: #7a7530;
       }
       .toolbar-btn:active {
-        background-color: #8b7a2e;
+        background-color: #6b6a25;
       }
       .toolbar-btn.active {
         background-color: #4CAF50;
@@ -287,9 +289,9 @@
       }
       .toolbar-select {
         padding: 6px 12px;
-        background-color: #a4943c;
+        background-color: #7a7530;
         color: #fff;
-        border: 1px solid #8b7a2e;
+        border: 1px solid #6b6a25;
         border-radius: 3px;
         cursor: pointer;
         font-family: Arial, sans-serif;
@@ -297,7 +299,8 @@
         min-width: 120px;
       }
       .toolbar-select:hover {
-        border-color: #999;
+        background-color: #8f8838;
+        border-color: #7a7530;
       }
       .toolbar-label {
         font-family: Arial, sans-serif;
@@ -343,21 +346,21 @@
             </div>
             <div class="toolbar-separator"></div>
             <div class="toolbar-group">
-              <button class="toolbar-btn" id="toolbar-undo" title="Annuler (Ctrl+Z)">↶ Annuler</button>
-              <button class="toolbar-btn" id="toolbar-redo" title="Rétablir (Ctrl+Y)">↷ Rétablir</button>
+              <button class="toolbar-btn" id="toolbar-undo" title="Annuler (Ctrl+Z)">↶</button>
+              <button class="toolbar-btn" id="toolbar-redo" title="Rétablir (Ctrl+Y)">↷</button>
             </div>
             <div class="toolbar-separator"></div>
             <div class="toolbar-group">
-              <button class="toolbar-btn" id="toolbar-find" title="Rechercher (Ctrl+F)">🔍 Rechercher</button>
-              <button class="toolbar-btn" id="toolbar-replace" title="Remplacer (Ctrl+H)">⇄ Remplacer</button>
+              <button class="toolbar-btn" id="toolbar-find" title="Rechercher (Ctrl+F)">🔍</button>
+              <button class="toolbar-btn" id="toolbar-replace" title="Remplacer (Ctrl+H)">⇄</button>
             </div>
             <div class="toolbar-separator"></div>
             <div class="toolbar-group">
-              <button class="toolbar-btn active" id="toolbar-theme-toggle" title="Basculer entre thème clair et sombre">☀️ Clair</button>
+              <button class="toolbar-btn active" id="toolbar-theme-toggle" title="Basculer entre thème clair et sombre">☀️</button>
             </div>
             <div class="toolbar-separator"></div>
             <div class="toolbar-group">
-              <button class="toolbar-btn active" id="toolbar-font-toggle" title="Basculer entre police Minitel et monospace">🔤 Minitel</button>
+              <button class="toolbar-btn active" id="toolbar-font-toggle" title="Basculer entre police Minitel et monospace">A</button>
             </div>
             <div class="toolbar-separator"></div>
             <div class="toolbar-group">
@@ -366,12 +369,12 @@
             </div>
             <div class="toolbar-separator"></div>
             <div class="toolbar-group">
-              <button class="toolbar-btn" id="toolbar-format" title="Formater le code (Mots-clés en MAJUSCULES, variables en minuscules)">📝 Formater</button>
+              <button class="toolbar-btn" id="toolbar-format" title="Formater le code (Mots-clés en MAJUSCULES, variables en minuscules)">📝</button>
             </div>
             <div class="toolbar-separator"></div>
             <div class="toolbar-group">
-              <button class="toolbar-btn" id="toolbar-line-numbers" title="Numéros de ligne"># Numéros</button>
-              <button class="toolbar-btn active" id="toolbar-line-wrapping" title="Retour à la ligne automatique">⤢ Retour ligne</button>
+              <button class="toolbar-btn" id="toolbar-line-numbers" title="Numéros de ligne">#</button>
+              <button class="toolbar-btn active" id="toolbar-line-wrapping" title="Retour à la ligne automatique">⤢</button>
             </div>
           </div>
           <div id="code-editor"></div>
@@ -611,11 +614,11 @@
         if (darkTheme) {
           editor.setOption('theme', 'monokai');
           this.classList.remove('active');
-          this.textContent = '🌙 Sombre';
+          this.textContent = '🌙';
         } else {
           editor.setOption('theme', 'default');
           this.classList.add('active');
-          this.textContent = '☀️ Clair';
+          this.textContent = '☀️';
         }
 
         editor.focus();
@@ -623,7 +626,7 @@
 
       // Update initial button state to reflect dark theme is default
       document.getElementById('toolbar-theme-toggle').classList.remove('active');
-      document.getElementById('toolbar-theme-toggle').textContent = '🌙 Sombre';
+      document.getElementById('toolbar-theme-toggle').textContent = '🌙';
 
       // Font toggle button
       document.getElementById('toolbar-font-toggle').addEventListener('click', function() {
@@ -641,7 +644,7 @@
           style.textContent = `.CodeMirror { font-family: 'Minitel', monospace !important; }`;
           document.head.appendChild(style);
           this.classList.add('active');
-          this.textContent = '🔤 Minitel';
+          this.textContent = 'A';
         } else {
           wrapper.style.fontFamily = "'Courier New', monospace";
           // Remove Minitel font style and apply Courier New
@@ -654,7 +657,7 @@
           style.textContent = `.CodeMirror { font-family: 'Courier New', monospace !important; }`;
           document.head.appendChild(style);
           this.classList.remove('active');
-          this.textContent = '🔤 Courier';
+          this.textContent = 'A';
         }
 
         editor.refresh();
