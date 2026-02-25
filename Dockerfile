@@ -47,10 +47,6 @@ RUN chmod +x /app/bastos-edi.sh /app/bastos-edi.py
 RUN mkdir -p /usr/local/bin
 COPY bin/* /usr/local/bin/
 
-# Configure vsftpd
-RUN mkdir -p /etc/vsftpd
-COPY ftp/vsftpd.conf /etc/vsftpd/vsftpd.conf
-
 # Create vsftpd lock file
 RUN touch /var/run/vsftpd.pid && chmod 777 /var/run/vsftpd.pid
 

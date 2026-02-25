@@ -83,8 +83,7 @@ $ firefox --kiosk http://localhost:9000
 # Tips pour l'émulateur BASTOS-EDI
 
 - Le mot de passe des réseaux émulés Wi-Fi est `changeme`
-- Le simulateur BASTOS sur x86 ne supporte pas encore les connexions WebSockets
-  ni les connexions FTP
+- Le simulateur BASTOS sur x86 ne supporte pas encore les connexions FTP
 - Pour sortir d'un programme BASTOS en exécution ou du mode connecté, **appuyer 2
   fois sur la touche ESC** (Emprunté aux Amstrad CPC)
 - Si on est bloqué dans l'émulateur ou si on n'arrive pas à reprendre la main,

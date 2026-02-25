@@ -28,6 +28,7 @@ Fonctions :
 - Liste des fichiers
 - Chargement d'un fichier dans l'éditeur
 - Suppression d'un fichier
+- Exécution d'un fichier
 
 ### Onglet Programme
 
@@ -70,5 +71,5 @@ Cette barre permet de gérer les fichiers courants et l'exécution :
 ## Conseils d'usage
 
 - Utilisez le formatage pour normaliser la casse des mots clés.
-- Sauvegardez régulièrement avant exécution.
+- Sauvegardez régulièrement avant exécution (Ctrl+S).
 - Le thème sombre est recommandé pour un usage prolongé.
