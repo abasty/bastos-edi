@@ -4,9 +4,7 @@
   _launcher_ BASTOS-EDI utilise `docker compose`
 - Uniquement testé sur Debian 13.3. L'image Docker `bastos-edi` est basée sur
   `debian:13-slim`
-- Le simulateur BASTOS sur x86 ne supporte pas encore les connexions WebSockets
-  ni les connexions FTP. Il est uniquement possible de se connecter sur des
-  sites TCP/TELNET, sans surcouche HTTP / WebSockets
+- Le simulateur BASTOS sur x86 ne supporte pas encore les connexions FTP.
 - Lire `MANUAL.md` pour utiliser BASTOS-EDI
 - Pas de documentation BASTOS pour l'instant, il faut lire les exemples :)
 - Le module BASTOS sur esp32 est entièrement compatible avec l'émulateur. Il

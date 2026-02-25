@@ -21,7 +21,8 @@ help:
 # Build the Docker image
 docker:
 	@echo "Building Docker image: $(IMAGE_NAME)"
-	docker build -t abasty/$(IMAGE_NAME) .
+	@ tar zcvf disk.tgz disk
+	@docker build -t abasty/$(IMAGE_NAME) .
 	@echo "✓ Docker image built successfully"
 
 # Run the container with docker compose
