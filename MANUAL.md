@@ -74,10 +74,13 @@ Cette barre permet de gérer les fichiers courants et l'exécution :
 La fonction de renumérotation permet de renumériser les numéros de ligne d'un programme BASIC.
 
 **Fonctionnement :**
-- Sélectionnez les lignes à renuméroter (au minimum 2 lignes numérotées)
-- Le premier numéro sélectionné définit le nouveau départ
-- Le deuxième numéro sélectionné définit l'écart (step) entre les numéros
-- Tous les numéros de ligne sélectionnés sont recalculés selon cette progression
+- Sélectionnez les lignes à renuméroter
+- Cliquez sur le bouton de renumérotation : une boîte de dialogue s'ouvre systématiquement
+- Le champ **Premier numéro** est prérempli avec le numéro de la première ligne numérotée de la sélection
+- Le champ **Incrément** est prérempli à `10` (modifiable)
+- Validez pour appliquer la renumérotation, ou annulez pour ne rien changer
+- Si la sélection ne contient aucune ligne numérotée, la boîte de dialogue indique que la renumérotation est impossible
+- Tous les numéros de ligne sélectionnés sont recalculés selon les valeurs saisies
 - Les lignes sans numéro sont ignorées
 - Les références `GOTO`, `GOSUB` et `THEN` sont automatiquement mises à jour dans **tout le document**
 
@@ -90,7 +93,7 @@ Avant :
 50 PRINT "Fin"
 
 Sélection : lignes avec numéros 10, 20, 30, 50
-Nouvelle progression : 100 (départ) + 10 (step)
+Dans la boîte de dialogue : Premier numéro = 100, Incrément = 10
 
 Après :
 100 PRINT "Début"

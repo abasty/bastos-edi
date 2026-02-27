@@ -17,18 +17,18 @@
 
 400 PRINT records$;
 410 IF INKEY$ ="" THEN 330
-420 RETURN 
+420 RETURN
 
 500 PRINT config$;
 510 IF INKEY$ ="" THEN 360
-520 RETURN 
+520 RETURN
 
 600 PRINT credits$;
 610 IF INKEY$ ="" THEN 390
-620 RETURN 
+620 RETURN
 
-700 CLS 
-710 END 
+700 CLS
+710 END
 
 
 REM "jeu"
@@ -44,7 +44,7 @@ REM "---- Score"
 1080 PRINT "\n";
 REM "---- Etoile star field"
 1090 GOSUB 5000
-1100 k$=INKEY$ 
+1100 k$=INKEY$
 1110 IF k$="a" AND sx>1 THEN LET sx=sx-1
 1120 IF k$="e" AND sx<37 THEN LET sx=sx+1
 1130 IF t=0 THEN 1160
@@ -56,7 +56,7 @@ REM "---- Tir si espace"
 REM "---- Affiche vaisseau"
 1170 AT 24,sx;v$
 REM "---- Fin jeu si x"
-1180 IF k$="x" THEN RETURN 
+1180 IF k$="x" THEN RETURN
 1190 PAUSE 100
 1200 GOTO 1020
 
@@ -69,7 +69,7 @@ REM "Nouvelle etoile"
 5050 IF r>=75 THEN LET e$="'"
 5060 ec=INT(RND*40)+1
 5070 AT 1,ec;e$
-5080 RETURN 
+5080 RETURN
 
 REM "Tir"
 REM "Chercher la ligne / case d'impact en remontant"
@@ -94,7 +94,7 @@ REM "Tir efface"
 
 REM "Score"
 6000 IF b<>0 THEN RETURN
-6010 i=5 
+6010 i=5
 6020 IF sc$(i)<"9" THEN 6060
 6030 sc$(i)="0"
 6040 i=i-1

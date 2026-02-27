@@ -455,12 +455,23 @@
       </div>
     </dialog>
 
-    <!-- Renumber info dialog -->
-    <dialog id="renumber-info-dialog" style="border: none; border-radius: 8px; background-color: #333; color: white; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-      <h2 style="margin-top: 0; margin-bottom: 15px;">Renumérotation impossible</h2>
-      <p style="margin-bottom: 20px;" id="renumber-info-message">Sélectionnez au moins 2 lignes numérotées.</p>
+    <!-- Renumber dialog -->
+    <dialog id="renumber-dialog" style="border: none; border-radius: 8px; background-color: #333; color: white; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); min-width: 320px;">
+      <h2 style="margin-top: 0; margin-bottom: 15px;">Renumérotation des lignes</h2>
+      <p style="margin-bottom: 15px;" id="renumber-dialog-message">Configurez la renumérotation :</p>
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+        <label for="renumber-start-input" style="display: flex; flex-direction: column; gap: 6px; font-family: Arial, sans-serif;">
+          <span>Premier numéro</span>
+          <input type="number" id="renumber-start-input" style="padding: 8px; border: 1px solid #555; border-radius: 4px; background-color: #444; color: white; font-family: Arial, sans-serif; box-sizing: border-box;" />
+        </label>
+        <label for="renumber-step-input" style="display: flex; flex-direction: column; gap: 6px; font-family: Arial, sans-serif;">
+          <span>Incrément</span>
+          <input type="number" id="renumber-step-input" value="10" style="padding: 8px; border: 1px solid #555; border-radius: 4px; background-color: #444; color: white; font-family: Arial, sans-serif; box-sizing: border-box;" />
+        </label>
+      </div>
       <div style="display: flex; gap: 10px; justify-content: flex-end;">
-        <button id="renumber-info-ok" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">OK</button>
+        <button id="renumber-cancel" style="padding: 8px 16px; background-color: #666; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">Annuler</button>
+        <button id="renumber-ok" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">Renuméroter</button>
       </div>
     </dialog>
 
@@ -851,10 +862,8 @@
       });
 
       // Renumber selected BASIC lines
-      document.getElementById('toolbar-renumber').addEventListener('click', function() {
+      document.getElementById('toolbar-renumber').addEventListener('click', async function() {
         const selections = editor.listSelections();
-        let hasChanges = false;
-        let hasRenumberableSelection = false;
 
         const isIdentifierChar = function(char) {
           return /[a-zA-Z0-9$%]/.test(char);
@@ -943,8 +952,8 @@
           return rewriteCodeOutsideStrings(codePart, renumberMap) + commentPart;
         };
 
-        editor.operation(function() {
-          selections.forEach(function(selection) {
+        const selectedRanges = selections
+          .map(function(selection) {
             const startLine = Math.min(selection.anchor.line, selection.head.line);
             let endLine = Math.max(selection.anchor.line, selection.head.line);
 
@@ -956,76 +965,102 @@
               endLine -= 1;
             }
 
-            if (endLine < startLine) {
-              return;
+            return {
+              startLine: startLine,
+              endLine: endLine
+            };
+          })
+          .filter(function(range) {
+            return range.endLine >= range.startLine;
+          })
+          .sort(function(a, b) {
+            return a.startLine - b.startLine;
+          });
+
+        const uniqueSelectedLineNumbers = new Set();
+        const selectedNumberedLines = [];
+
+        selectedRanges.forEach(function(range) {
+          for (let lineNumber = range.startLine; lineNumber <= range.endLine; lineNumber++) {
+            if (uniqueSelectedLineNumbers.has(lineNumber)) {
+              continue;
             }
 
-            const numberedLines = [];
+            uniqueSelectedLineNumbers.add(lineNumber);
 
-            for (let lineNumber = startLine; lineNumber <= endLine; lineNumber++) {
-              const lineText = editor.getLine(lineNumber);
-              const match = lineText.match(/^(\s*)(\d+)(.*)$/);
+            const lineText = editor.getLine(lineNumber);
+            const match = lineText.match(/^(\s*)(\d+)(.*)$/);
 
-              if (match) {
-                numberedLines.push({
-                  lineNumber: lineNumber,
-                  indent: match[1],
-                  originalNumber: parseInt(match[2], 10),
-                  rest: match[3]
-                });
-              }
+            if (match) {
+              selectedNumberedLines.push({
+                lineNumber: lineNumber,
+                indent: match[1],
+                originalNumber: parseInt(match[2], 10),
+                rest: match[3]
+              });
             }
+          }
+        });
 
-            if (numberedLines.length < 2) {
-              return;
-            }
+        const canRenumber = selectedNumberedLines.length > 0;
+        const defaultFirstNumber = canRenumber ? selectedNumberedLines[0].originalNumber : 10;
+        const dialogResult = await showRenumberDialog(defaultFirstNumber, canRenumber);
 
-            hasRenumberableSelection = true;
+        if (!dialogResult.confirmed) {
+          editor.focus();
+          return;
+        }
 
-            const firstNumber = numberedLines[0].originalNumber;
-            const step = numberedLines[1].originalNumber - numberedLines[0].originalNumber;
-            let currentNumber = firstNumber;
-            const renumberMap = new Map();
+        const firstNumber = dialogResult.firstNumber;
+        const step = dialogResult.step;
+        let currentNumber = firstNumber;
+        let hasChanges = false;
+        const globalRenumberMap = new Map();
 
-            numberedLines.forEach(function(lineInfo) {
-              renumberMap.set(lineInfo.originalNumber, currentNumber);
-              const newLineText = `${lineInfo.indent}${currentNumber}${lineInfo.rest}`;
+        editor.operation(function() {
+          const pendingLineRenumberings = [];
 
-              if (newLineText !== editor.getLine(lineInfo.lineNumber)) {
-                editor.replaceRange(
-                  newLineText,
-                  { line: lineInfo.lineNumber, ch: 0 },
-                  { line: lineInfo.lineNumber, ch: editor.getLine(lineInfo.lineNumber).length }
-                );
-                hasChanges = true;
-              }
-
-              currentNumber += step;
+          selectedNumberedLines.forEach(function(lineInfo) {
+            globalRenumberMap.set(lineInfo.originalNumber, currentNumber);
+            pendingLineRenumberings.push({
+              lineNumber: lineInfo.lineNumber,
+              newLineText: `${lineInfo.indent}${currentNumber}${lineInfo.rest}`
             });
 
-            const lastLineIndex = editor.lineCount() - 1;
-            for (let lineNumber = 0; lineNumber <= lastLineIndex; lineNumber++) {
-              const currentLineText = editor.getLine(lineNumber);
-              const rewrittenLineText = rewriteLineReferences(currentLineText, renumberMap);
+            currentNumber += step;
+          });
 
-              if (rewrittenLineText !== currentLineText) {
-                editor.replaceRange(
-                  rewrittenLineText,
-                  { line: lineNumber, ch: 0 },
-                  { line: lineNumber, ch: currentLineText.length }
-                );
-                hasChanges = true;
-              }
+          pendingLineRenumberings.forEach(function(change) {
+            const currentLineText = editor.getLine(change.lineNumber);
+
+            if (change.newLineText !== currentLineText) {
+              editor.replaceRange(
+                change.newLineText,
+                { line: change.lineNumber, ch: 0 },
+                { line: change.lineNumber, ch: currentLineText.length }
+              );
+              hasChanges = true;
             }
           });
+
+          const lastLineIndex = editor.lineCount() - 1;
+          for (let lineNumber = 0; lineNumber <= lastLineIndex; lineNumber++) {
+            const currentLineText = editor.getLine(lineNumber);
+            const rewrittenLineText = rewriteLineReferences(currentLineText, globalRenumberMap);
+
+            if (rewrittenLineText !== currentLineText) {
+              editor.replaceRange(
+                rewrittenLineText,
+                { line: lineNumber, ch: 0 },
+                { line: lineNumber, ch: currentLineText.length }
+              );
+              hasChanges = true;
+            }
+          }
         });
 
         if (hasChanges) {
           updateStatus('modified');
-        }
-
-        if (!hasRenumberableSelection) {
-          showRenumberInfoDialog('Sélectionnez au moins 2 lignes numérotées.');
         }
 
         editor.focus();
@@ -1479,31 +1514,104 @@
         }, { once: true });
       }
 
-      function showRenumberInfoDialog(messageText) {
-        const dialog = document.getElementById('renumber-info-dialog');
-        const message = document.getElementById('renumber-info-message');
-        const okBtn = document.getElementById('renumber-info-ok');
+      function showRenumberDialog(defaultFirstNumber, canRenumber) {
+        return new Promise((resolve) => {
+          const dialog = document.getElementById('renumber-dialog');
+          const message = document.getElementById('renumber-dialog-message');
+          const startInput = document.getElementById('renumber-start-input');
+          const stepInput = document.getElementById('renumber-step-input');
+          const cancelBtn = document.getElementById('renumber-cancel');
+          const okBtn = document.getElementById('renumber-ok');
 
-        message.textContent = messageText;
+          startInput.value = String(defaultFirstNumber);
+          stepInput.value = '10';
 
-        const handleOk = () => {
-          dialog.close();
-        };
+          startInput.disabled = !canRenumber;
+          stepInput.disabled = !canRenumber;
+          okBtn.disabled = !canRenumber;
 
-        const handleBackdropClick = (event) => {
-          if (event.target === dialog) {
+          message.textContent = canRenumber
+            ? 'Configurez la renumérotation :'
+            : 'Renumérotation impossible : aucune ligne numérotée dans la sélection.';
+
+          let done = false;
+
+          const finish = (result) => {
+            if (done) {
+              return;
+            }
+
+            done = true;
+            resolve(result);
             dialog.close();
-          }
-        };
+          };
 
-        okBtn.addEventListener('click', handleOk);
-        dialog.addEventListener('click', handleBackdropClick);
-        dialog.showModal();
+          const handleCancel = () => {
+            finish({ confirmed: false });
+          };
 
-        dialog.addEventListener('close', () => {
-          okBtn.removeEventListener('click', handleOk);
-          dialog.removeEventListener('click', handleBackdropClick);
-        }, { once: true });
+          const handleOk = () => {
+            const firstNumber = parseInt(startInput.value, 10);
+            const step = parseInt(stepInput.value, 10);
+
+            if (Number.isNaN(firstNumber) || Number.isNaN(step)) {
+              message.textContent = 'Veuillez saisir des valeurs numériques valides.';
+              return;
+            }
+
+            finish({
+              confirmed: true,
+              firstNumber: firstNumber,
+              step: step
+            });
+          };
+
+          const handleKeyDown = (event) => {
+            if (event.key === 'Enter' && canRenumber) {
+              event.preventDefault();
+              handleOk();
+            }
+          };
+
+          const handleBackdropClick = (event) => {
+            if (event.target === dialog) {
+              finish({ confirmed: false });
+            }
+          };
+
+          const cleanup = () => {
+            cancelBtn.removeEventListener('click', handleCancel);
+            okBtn.removeEventListener('click', handleOk);
+            dialog.removeEventListener('click', handleBackdropClick);
+            startInput.removeEventListener('keydown', handleKeyDown);
+            stepInput.removeEventListener('keydown', handleKeyDown);
+          };
+
+          cancelBtn.addEventListener('click', handleCancel);
+          okBtn.addEventListener('click', handleOk);
+          dialog.addEventListener('click', handleBackdropClick);
+          startInput.addEventListener('keydown', handleKeyDown);
+          stepInput.addEventListener('keydown', handleKeyDown);
+
+          dialog.addEventListener('close', () => {
+            cleanup();
+            if (!done) {
+              done = true;
+              resolve({ confirmed: false });
+            }
+          }, { once: true });
+
+          dialog.showModal();
+
+          setTimeout(() => {
+            if (canRenumber) {
+              startInput.focus();
+              startInput.select();
+            } else {
+              cancelBtn.focus();
+            }
+          }, 0);
+        });
       }
 
       function runFileFromFilesList(filename) {
