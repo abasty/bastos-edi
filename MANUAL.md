@@ -54,7 +54,8 @@ La barre d'outils contient des boutons pour les actions courantes :
 - Basculer thème clair ou sombre
 - Basculer police (Minitel / monospace)
 - Taille de police (A- / A+)
-- Formater le code
+- Formater le code (mots-clés en majuscules, variables en minuscules)
+- Renuméroter les lignes sélectionnées
 - Numéros de ligne
 - Retour ligne
 
@@ -67,6 +68,36 @@ Cette barre permet de gérer les fichiers courants et l'exécution :
 - Exécuter
 - Nom du fichier actif
 - État (modifié, envoyé, etc.)
+
+#### Renumérotation des lignes
+
+La fonction de renumérotation permet de renumériser les numéros de ligne d'un programme BASIC.
+
+**Fonctionnement :**
+- Sélectionnez les lignes à renuméroter (au minimum 2 lignes numérotées)
+- Le premier numéro sélectionné définit le nouveau départ
+- Le deuxième numéro sélectionné définit l'écart (step) entre les numéros
+- Tous les numéros de ligne sélectionnés sont recalculés selon cette progression
+- Les lignes sans numéro sont ignorées
+- Les références `GOTO`, `GOSUB` et `THEN` sont automatiquement mises à jour dans **tout le document**
+
+**Exemple :**
+```
+Avant :
+10 PRINT "Début"
+20 GOTO 50
+30 PRINT "Milieu"
+50 PRINT "Fin"
+
+Sélection : lignes avec numéros 10, 20, 30, 50
+Nouvelle progression : 100 (départ) + 10 (step)
+
+Après :
+100 PRINT "Début"
+110 GOTO 150
+120 PRINT "Milieu"
+150 PRINT "Fin"
+```
 
 ## Conseils d'usage
 
