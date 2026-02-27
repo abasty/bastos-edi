@@ -370,6 +370,7 @@
             <div class="toolbar-separator"></div>
             <div class="toolbar-group">
               <button class="toolbar-btn" id="toolbar-format" title="Formater le code (Mots-clés en MAJUSCULES, variables en minuscules)">📝</button>
+              <button class="toolbar-btn" id="toolbar-renumber" title="Renuméroter les lignes sélectionnées">🔢</button>
             </div>
             <div class="toolbar-separator"></div>
             <div class="toolbar-group">
@@ -451,6 +452,15 @@
       <p style="margin-bottom: 20px;" id="delete-error-message">Une erreur s'est produite lors de la suppression du fichier.</p>
       <div style="display: flex; gap: 10px; justify-content: flex-end;">
         <button id="delete-error-ok" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">OK</button>
+      </div>
+    </dialog>
+
+    <!-- Renumber info dialog -->
+    <dialog id="renumber-info-dialog" style="border: none; border-radius: 8px; background-color: #333; color: white; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+      <h2 style="margin-top: 0; margin-bottom: 15px;">Renumérotation impossible</h2>
+      <p style="margin-bottom: 20px;" id="renumber-info-message">Sélectionnez au moins 2 lignes numérotées.</p>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="renumber-info-ok" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;">OK</button>
       </div>
     </dialog>
 
@@ -838,6 +848,187 @@
         if (code !== formattedLines.join('\n')) {
           updateStatus('modified');
         }
+      });
+
+      // Renumber selected BASIC lines
+      document.getElementById('toolbar-renumber').addEventListener('click', function() {
+        const selections = editor.listSelections();
+        let hasChanges = false;
+        let hasRenumberableSelection = false;
+
+        const isIdentifierChar = function(char) {
+          return /[a-zA-Z0-9$%]/.test(char);
+        };
+
+        const findRemStartOutsideStrings = function(lineText) {
+          let inString = false;
+
+          for (let i = 0; i < lineText.length; i++) {
+            const char = lineText[i];
+            const prevChar = i > 0 ? lineText[i - 1] : '';
+
+            if (char === '"' && prevChar !== '\\') {
+              inString = !inString;
+              continue;
+            }
+
+            if (inString) {
+              continue;
+            }
+
+            if (lineText.substring(i, i + 3).toUpperCase() === 'REM') {
+              const beforeChar = i > 0 ? lineText[i - 1] : '';
+              const afterChar = i + 3 < lineText.length ? lineText[i + 3] : '';
+              const beforeIsIdentifier = i > 0 && isIdentifierChar(beforeChar);
+              const afterIsIdentifier = i + 3 < lineText.length && isIdentifierChar(afterChar);
+
+              if (!beforeIsIdentifier && !afterIsIdentifier) {
+                return i;
+              }
+            }
+          }
+
+          return -1;
+        };
+
+        const rewriteCodeOutsideStrings = function(codeText, renumberMap) {
+          const rewriteSegment = function(segment) {
+            return segment.replace(/\b(GOTO|GOSUB|THEN)\b(\s+)(\d+)\b/gi, function(match, keyword, spacing, numberText) {
+              const oldNumber = parseInt(numberText, 10);
+              if (!renumberMap.has(oldNumber)) {
+                return match;
+              }
+
+              return `${keyword}${spacing}${renumberMap.get(oldNumber)}`;
+            });
+          };
+
+          let result = '';
+          let currentSegment = '';
+          let inString = false;
+
+          for (let i = 0; i < codeText.length; i++) {
+            const char = codeText[i];
+            const prevChar = i > 0 ? codeText[i - 1] : '';
+
+            if (char === '"' && prevChar !== '\\') {
+              if (!inString) {
+                result += rewriteSegment(currentSegment);
+                currentSegment = char;
+                inString = true;
+              } else {
+                currentSegment += char;
+                result += currentSegment;
+                currentSegment = '';
+                inString = false;
+              }
+              continue;
+            }
+
+            currentSegment += char;
+          }
+
+          if (currentSegment) {
+            result += inString ? currentSegment : rewriteSegment(currentSegment);
+          }
+
+          return result;
+        };
+
+        const rewriteLineReferences = function(lineText, renumberMap) {
+          const remStartIndex = findRemStartOutsideStrings(lineText);
+          const codePart = remStartIndex === -1 ? lineText : lineText.substring(0, remStartIndex);
+          const commentPart = remStartIndex === -1 ? '' : lineText.substring(remStartIndex);
+
+          return rewriteCodeOutsideStrings(codePart, renumberMap) + commentPart;
+        };
+
+        editor.operation(function() {
+          selections.forEach(function(selection) {
+            const startLine = Math.min(selection.anchor.line, selection.head.line);
+            let endLine = Math.max(selection.anchor.line, selection.head.line);
+
+            const selectionEndsAtLineStart =
+              (selection.head.line > selection.anchor.line && selection.head.ch === 0) ||
+              (selection.anchor.line > selection.head.line && selection.anchor.ch === 0);
+
+            if (selectionEndsAtLineStart) {
+              endLine -= 1;
+            }
+
+            if (endLine < startLine) {
+              return;
+            }
+
+            const numberedLines = [];
+
+            for (let lineNumber = startLine; lineNumber <= endLine; lineNumber++) {
+              const lineText = editor.getLine(lineNumber);
+              const match = lineText.match(/^(\s*)(\d+)(.*)$/);
+
+              if (match) {
+                numberedLines.push({
+                  lineNumber: lineNumber,
+                  indent: match[1],
+                  originalNumber: parseInt(match[2], 10),
+                  rest: match[3]
+                });
+              }
+            }
+
+            if (numberedLines.length < 2) {
+              return;
+            }
+
+            hasRenumberableSelection = true;
+
+            const firstNumber = numberedLines[0].originalNumber;
+            const step = numberedLines[1].originalNumber - numberedLines[0].originalNumber;
+            let currentNumber = firstNumber;
+            const renumberMap = new Map();
+
+            numberedLines.forEach(function(lineInfo) {
+              renumberMap.set(lineInfo.originalNumber, currentNumber);
+              const newLineText = `${lineInfo.indent}${currentNumber}${lineInfo.rest}`;
+
+              if (newLineText !== editor.getLine(lineInfo.lineNumber)) {
+                editor.replaceRange(
+                  newLineText,
+                  { line: lineInfo.lineNumber, ch: 0 },
+                  { line: lineInfo.lineNumber, ch: editor.getLine(lineInfo.lineNumber).length }
+                );
+                hasChanges = true;
+              }
+
+              currentNumber += step;
+            });
+
+            const lastLineIndex = editor.lineCount() - 1;
+            for (let lineNumber = 0; lineNumber <= lastLineIndex; lineNumber++) {
+              const currentLineText = editor.getLine(lineNumber);
+              const rewrittenLineText = rewriteLineReferences(currentLineText, renumberMap);
+
+              if (rewrittenLineText !== currentLineText) {
+                editor.replaceRange(
+                  rewrittenLineText,
+                  { line: lineNumber, ch: 0 },
+                  { line: lineNumber, ch: currentLineText.length }
+                );
+                hasChanges = true;
+              }
+            }
+          });
+        });
+
+        if (hasChanges) {
+          updateStatus('modified');
+        }
+
+        if (!hasRenumberableSelection) {
+          showRenumberInfoDialog('Sélectionnez au moins 2 lignes numérotées.');
+        }
+
+        editor.focus();
       });
 
       // Language selector
@@ -1285,6 +1476,33 @@
         // Cleanup listeners when dialog closes
         dialog.addEventListener('close', () => {
           okBtn.removeEventListener('click', handleOk);
+        }, { once: true });
+      }
+
+      function showRenumberInfoDialog(messageText) {
+        const dialog = document.getElementById('renumber-info-dialog');
+        const message = document.getElementById('renumber-info-message');
+        const okBtn = document.getElementById('renumber-info-ok');
+
+        message.textContent = messageText;
+
+        const handleOk = () => {
+          dialog.close();
+        };
+
+        const handleBackdropClick = (event) => {
+          if (event.target === dialog) {
+            dialog.close();
+          }
+        };
+
+        okBtn.addEventListener('click', handleOk);
+        dialog.addEventListener('click', handleBackdropClick);
+        dialog.showModal();
+
+        dialog.addEventListener('close', () => {
+          okBtn.removeEventListener('click', handleOk);
+          dialog.removeEventListener('click', handleBackdropClick);
         }, { once: true });
       }
 
