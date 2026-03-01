@@ -118,14 +118,27 @@ REM "li: ligne impact"
 3050 NEXT i
 3060 lf=1
 3070 IF imp<>0 THEN LET lf=imp
-3080 FOR l=23 TO lf step -2
+3080 FOR l=23 TO lf STEP -2
 3090 AT l,sxl;"|"
 3100 NEXT l
 3110 t=1
-3120 RETURN
+3200 IF imp=0 THEN RETURN
+REM "Score+100"
+3210 i=4
+3220 GOSUB 4030
+REM "Effacer ligne d'impact et au dessus (si pas 0)"
+3230 AT imp,sxl-1;". +"
+3240 li=(top+imp-1)%24+1
+3250 scr$(li,sxl-1,sxl+1)="   "
+3260 IF imp<=1 THEN RETURN
+3270 AT imp-1,sxl-1;" . "
+3280 li=(li-1+23)%24+1
+3290 scr$(li,sxl-1,sxl+1)="   "
+3300 RETURN
+
 REM "Tir efface"
 3500 lt=1
-3520 FOR l=22 TO lf-1 step -2
+3520 FOR l=22 TO lf+1 STEP -2
 3530 AT l,sxl;" "
 3540 NEXT l
 3560 t=0
@@ -145,9 +158,9 @@ REM "Calcule nouveau score"
 REM "Explosion vaisseau"
 4200 scr$(l24+1,sx,sx+2)="   "
 4210 p=150
-4220 AT 24,sx;"***"
+4220 AT 24,sx-1;"-***-"
 4230 PAUSE p
-4240 AT 24,sx;"-*-"
+4240 AT 24,sx-1;" -*- "
 4250 PAUSE p
 4260 AT 24,sx;" - "
 4270 PAUSE p
