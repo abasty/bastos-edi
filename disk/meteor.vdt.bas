@@ -17,7 +17,7 @@ AT 2,13;SIZE 1;"<<< METEOR >>>"
 
 REM "----------------------------------------------"
 OUTPUT jeu$
-AT 0,5;CLEOL;"SCORE: 000000   RECORD: 000000";CLS
+AT 0,1;CLEOL;"SCORE:000000 RECORD:000000";CLS
 
 REM "----------------------------------------------"
 OUTPUT records$
