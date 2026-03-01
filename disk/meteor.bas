@@ -46,9 +46,10 @@ REM "v: Vies"
 918 top=0
 920 col=0
 922 v=3
-924 AT 0,28;"vies:";REP$ v,"°"
+924 AT 0,28;"V:";REP$ v,"°"
 926 v$=vn$
 928 immu=0
+930 fin=0
 
 REM "Jeu boucle"
 REM "---- Scroll down et ajuste top, l24 et scr$"
@@ -63,8 +64,7 @@ REM "---- Test de collision"
 REM "---- COLLISION"
 1070 GOSUB 4200
 1080 col=0
-1090 PAUSE 500
-1100 scr$(l24+1,sx,sx+2)="   "
+1090 IF fin THEN RETURN
 REM "---- Affiche vaisseau"
 1110 GOSUB 2500
 REM "---- Star field"
@@ -140,21 +140,32 @@ REM "Calcule nouveau score"
 4080 RETURN
 
 REM "Explosion vaisseau"
-4200 p=150
-4210 AT 24,sx;"***"
-4220 PAUSE p
-4230 AT 24,sx;"-*-"
-4240 PAUSE p
-4250 AT 24,sx;" - "
-4260 PAUSE p
-4270 AT 24,sx+1;"."
-4280 PAUSE p
-4290 AT 24,sx+1;" "
-4300 IF v<=0 THEN 4320
-4310 v=v-1
-4320 immu=24
-4330 AT 0,28;"vies:";REP$ v,"°";" "
-4340 RETURN
+4200 scr$(l24+1,sx,sx+2)="   "
+4210 p=150
+4220 AT 24,sx;"***"
+4230 PAUSE p
+4240 AT 24,sx;"-*-"
+4250 PAUSE p
+4260 AT 24,sx;" - "
+4270 PAUSE p
+4280 AT 24,sx+1;"."
+4290 PAUSE p
+4300 AT 24,sx+1;" "
+4310 IF v<=0 THEN 4360
+4320 v=v-1
+4330 immu=24
+4340 AT 0,28;"V:";REP$ v,"°";" "
+4345 PAUSE 2000
+4350 RETURN
+REM "Game over"
+4360 fin=1
+4370 AT 13,12;INK 2;SIZE 1;"    GAME OVER    ";SIZE 0;
+4380 AT 14,12;REP$ 17," ";
+4390 AT 15,12;FLASH 1;     "  Press 'x' key ";FLASH 0;
+4400 j$=INKEY$
+4410 PAUSE 50
+4420 IF j$="x" THEN RETURN
+4430 GOTO 4400
 
 REM "Affiche meteor"
 REM "sm$: Sprite meteor, cml: Current meteor line"
@@ -182,6 +193,7 @@ REM "Calcule nouveau meteor"
 5550 RETURN
 
 
+REM "Debug STOP"
 9000 AT 0,37;"STOP\n"
 9010 IF INKEY$="" THEN 9010
 9020 RETURN
