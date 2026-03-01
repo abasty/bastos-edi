@@ -109,24 +109,27 @@ REM "Affichage vaisseau"
 
 REM "Tir"
 REM "Chercher la ligne / case d'impact en remontant"
-REM "Pour l'instant : ligne 1"
+REM "li: ligne impact"
 3000 sxl=sx+1
-3020 AT 23,sxl
-3030 FOR l=1 TO 11
-3040 PRINT "|\x08\x0b\x0b";
-3060 NEXT l
-3065 PRINT "|";
-3070 t=1
-3080 RETURN
+3010 imp=0
+3020 FOR i=1 TO 23
+3030 li=(top+i-1)%24+1
+3040 IF scr$(li,sxl)<>" " THEN LET imp=i
+3050 NEXT i
+3060 lf=1
+3070 IF imp<>0 THEN LET lf=imp
+3080 FOR l=23 TO lf step -2
+3090 AT l,sxl;"|"
+3100 NEXT l
+3110 t=1
+3120 RETURN
 REM "Tir efface"
 3500 lt=1
-3510 AT 22,sxl
-3520 FOR l=1 TO 10
-3530 PRINT " \x08\x0b\x0b";
+3520 FOR l=22 TO lf-1 step -2
+3530 AT l,sxl;" "
 3540 NEXT l
-3545 PRINT " ";
-3550 t=0
-3560 RETURN
+3560 t=0
+3570 RETURN
 
 REM "Calcule nouveau score"
 4000 b=(b+1)%10
