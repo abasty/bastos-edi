@@ -1,7 +1,7 @@
 100 LOAD "meteor.vdt.var"
-110 v$="H"+(INVERSE 1)+"O"+(INVERSE 0)+"H"
-120 rc$="00000"
-
+110 rc$="00000"
+120 vn$="H"+(INVERSE 1)+"O"+(INVERSE 0)+"H"
+130 vi$="/T\\"
 
 140 PRINT menu$;
 170 INPUT "Choix: ",c
@@ -33,6 +33,7 @@ REM "Jeu init"
 REM "sc$: score, sx: X vaisseau, b: Compteur 1/10s"
 REM "scr$: Screen / collision, top: n° 1ère ligne"
 REM "col: à 1 si collision, l24: ligne 24 dans scr$"
+REM "v: Vies"
 900 sc$="00000"
 902 sx=20
 904 l24=23
@@ -44,6 +45,10 @@ REM "col: à 1 si collision, l24: ligne 24 dans scr$"
 916 b=0
 918 top=0
 920 col=0
+922 v=3
+924 AT 0,28;"vies:";REP$ v,"°"
+926 v$=vn$
+928 immu=0
 
 REM "Jeu boucle"
 REM "---- Scroll down et ajuste top, l24 et scr$"
@@ -51,47 +56,56 @@ REM "---- Scroll down et ajuste top, l24 et scr$"
 1010 l24=(l24+23)%24
 1020 top=(top+23)%24
 REM "---- Test de collision"
-1030 col=scr$(l24+1,sx,sx+2)<>"   "
-1040 IF col=0 THEN 1080
+1030 IF immu>0 THEN LET immu=immu-1
+1040 IF immu>0 THEN 1110
+1050 col=scr$(l24+1,sx,sx+2)<>"   "
+1060 IF col=0 THEN 1110
 REM "---- COLLISION"
-1050 col=0
-1060 PAUSE 500
-1070 scr$(l24+1,sx,sx+2)="   "
+1070 GOSUB 4200
+1080 col=0
+1090 PAUSE 500
+1100 scr$(l24+1,sx,sx+2)="   "
 REM "---- Affiche vaisseau"
-1080 AT 24,sx;v$
+1110 GOSUB 2500
 REM "---- Star field"
-1090 GOSUB 2000
+1120 GOSUB 2000
 REM "---- Nouveau meteor"
-1100 GOSUB 5000
+1130 GOSUB 5000
 REM "---- Score"
-1110 GOSUB 4000
-1120 AT 0,7;sc$
-1130 IF sc$>rc$ THEN LET rc$=sc$
-1140 AT 0,21;rc$;"\n"
-1150 k$=INKEY$
-1160 IF k$="a" AND sx>1 THEN LET sx=sx-1
-1170 IF k$="e" AND sx<37 THEN LET sx=sx+1
+1140 GOSUB 4000
+1150 AT 0,7;sc$
+1160 IF sc$>rc$ THEN LET rc$=sc$
+1170 AT 0,21;rc$;"\n"
+1180 k$=INKEY$
+1190 IF k$="a" AND sx>1 THEN LET sx=sx-1
+1200 IF k$="e" AND sx<37 THEN LET sx=sx+1
 REM "---- Efface tir si t=1"
-1180 IF t=0 THEN 1210
-1190 GOSUB 3500
-1200 GOTO 1230
+1210 IF t=0 THEN 1240
+1220 GOSUB 3500
+1230 GOTO 1260
 REM "---- Tir si espace"
-1210 IF k$=" " THEN GOSUB 3000
+1240 IF immu=0 AND k$=" " THEN GOSUB 3000
 REM "---- Fin jeu si x"
-1220 IF k$="x" THEN RETURN
-1230 PAUSE 150
-1240 GOTO 1000
+1250 IF k$="x" THEN RETURN
+1260 PAUSE 150
+1270 GOTO 1000
 
 REM "Nouvelle etoile"
 2000 r=INT(RND*100)
 2010 e$="."
-2020 IF r>=35 THEN LET e$="+"
+2020 IF r>=35 THEN LET e$="+"²
 2030 IF r>=55 THEN LET e$="*"
 2040 IF r>=65 THEN LET e$="o"
 2050 IF r>=75 THEN LET e$="'"
 2060 ec=INT(RND*40)+1
 2070 AT 1,ec;e$
 2080 RETURN
+
+REM "Affichage vaisseau"
+2505 IF immu>0 THEN LET v$=vi$
+2510 IF immu=0 THEN LET v$=vn$
+2520 AT 24,sx;v$
+2530 RETURN
 
 REM "Tir"
 REM "Chercher la ligne / case d'impact en remontant"
@@ -125,6 +139,23 @@ REM "Calcule nouveau score"
 4070 sc$(i)=CHR$((CODE sc$(i))+1)
 4080 RETURN
 
+REM "Explosion vaisseau"
+4200 p=150
+4210 AT 24,sx;"***"
+4220 PAUSE p
+4230 AT 24,sx;"-*-"
+4240 PAUSE p
+4250 AT 24,sx;" - "
+4260 PAUSE p
+4270 AT 24,sx+1;"."
+4280 PAUSE p
+4290 AT 24,sx+1;" "
+4300 IF v<=0 THEN 4320
+4310 v=v-1
+4320 immu=24
+4330 AT 0,28;"vies:";REP$ v,"°";" "
+4340 RETURN
+
 REM "Affiche meteor"
 REM "sm$: Sprite meteor, cml: Current meteor line"
 REM "lm: largeur meteor, hm: hauteur meteor"
@@ -135,7 +166,7 @@ REM "---- cml==0: Calcule un nouveau meteor"
 REM "---- cml==0: Colonne nouveau meteor"
 5020 cm=INT(RND*(41-lm))+1
 REM "---- Affiche la ligne courante du meteor"
-5030 AT 1,cm;sm$(hm-cml);G0
+5030 AT 1,cm;sm$(hm-cml)
 REM "---- MAJ scr$ pour test collision"
 5040 scr$(top+1)=""
 5050 scr$(top+1,cm TO cm+lm-1)="XXXXX"
@@ -149,3 +180,8 @@ REM "Calcule nouveau meteor"
 5530 hm=2
 5540 lm=2
 5550 RETURN
+
+
+9000 AT 0,37;"STOP\n"
+9010 IF INKEY$="" THEN 9010
+9020 RETURN
