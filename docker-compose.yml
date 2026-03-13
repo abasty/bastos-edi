@@ -10,4 +10,4 @@ services:
       - ./disk:/app/disk
     environment:
       - PYTHONUNBUFFERED=1
-    restart: unless-stopped
+    restart: "no"
