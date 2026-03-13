@@ -1,28 +1,36 @@
-100 LOAD "meteor.vdt.var"
-110 rc$="00000"
-120 vn$="H"+(INVERSE 1)+"O"+(INVERSE 0)+"H"
-130 vi$="/T\\"
+REM "Bootstrap"
+100 FAST
+105 SCROLL 1
+110 GOSUB 10000
+120 rc$="00000"
+130 vn$="H"+(INVERSE 1)+"O"+(INVERSE 0)+"H"
+140 vi$="/T\\"
 
-140 PRINT menu$;
-170 INPUT "Choix: ",c
-180 c=INT c
+REM "Menu principal"
+150 PRINT menu$;
+160 INPUT "\nChoix: ",c
+170 c=INT c
+180 IF c<1 THEN LET c=1
+190 IF c>=5 THEN LET c=5
+200 GOSUB c*100+200
+210 GOTO 150
 
-190 IF c<1 THEN LET c=1
-200 IF c>=5 THEN LET c=5
-210 GOSUB c*100+200
-220 GOTO 140
-
-300 PRINT jeu$;CURSOR 0;
+REM "Jeu"
+300 CURSOR 0
+305 PRINT jeu$;
 310 GOTO 900
 
+REM "Hall of Fame"
 400 PRINT records$;
 410 IF INKEY$ ="" THEN 410
 420 RETURN
 
+REM "Configuration"
 500 PRINT config$;
 510 IF INKEY$ ="" THEN 510
 520 RETURN
 
+REM "Credits"
 600 PRINT credits$;
 610 IF INKEY$ ="" THEN 610
 620 RETURN
@@ -45,8 +53,8 @@ REM "v: Vies"
 916 b=0
 918 top=0
 920 col=0
-922 v=3
-924 AT 0,28;"V:";REP$ v,"°"
+922 v=2
+924 AT 0,28;"V:";REP$ 3,"°"
 926 v$=vn$
 928 immu=0
 930 fin=0
@@ -102,7 +110,7 @@ REM "Nouvelle etoile"
 2080 RETURN
 
 REM "Affichage vaisseau"
-2505 IF immu>0 THEN LET v$=vi$
+2500 IF immu>0 THEN LET v$=vi$
 2510 IF immu=0 THEN LET v$=vn$
 2520 AT 24,sx;v$
 2530 RETURN
@@ -167,21 +175,23 @@ REM "Explosion vaisseau"
 4280 AT 24,sx+1;"."
 4290 PAUSE p
 4300 AT 24,sx+1;" "
-4310 IF v<=0 THEN 4360
+4310 IF v<=0 THEN 4500
 4320 v=v-1
 4330 immu=24
-4340 AT 0,28;"V:";REP$ v,"°";" "
-4345 PAUSE 2000
-4350 RETURN
+4340 AT 0,28;"V:";REP$ (v+1),"°";" \n"
+4350 PAUSE 2000
+4360 RETURN
+
 REM "Game over"
-4360 fin=1
-4370 AT 13,12;INK 2;SIZE 1;"    GAME OVER    ";SIZE 0;
-4380 AT 14,12;REP$ 17," ";
-4390 AT 15,12;FLASH 1;     "  Press 'x' key ";FLASH 0;
-4400 j$=INKEY$
-4410 PAUSE 50
-4420 IF j$="x" THEN RETURN
-4430 GOTO 4400
+4500 fin=1
+4505 AT 0,28;"V:---\n"
+4510 AT 13,12;INK 2;SIZE 1;"    GAME OVER    ";SIZE 0;
+4520 AT 14,12;REP$ 17," ";
+4530 AT 15,12;FLASH 1;     "  Press 'x' key ";FLASH 0;
+4540 j$=INKEY$
+4550 PAUSE 50
+4560 IF j$="x" THEN RETURN
+4570 GOTO 4540
 
 REM "Affiche meteor"
 REM "sm$: Sprite meteor, cml: Current meteor line"
@@ -208,8 +218,62 @@ REM "Calcule nouveau meteor"
 5540 lm=2
 5550 RETURN
 
-
 REM "Debug STOP"
 9000 AT 0,37;"STOP\n"
 9010 IF INKEY$="" THEN 9010
 9020 RETURN
+
+REM "Définition statique des écrans"
+REM "----------------------------------------------"
+10000 OUTPUT bottom$
+10010 AT 24,10;REP$ 10,"<";REP$ 10,">"
+
+REM "----------------------------------------------"
+10030 OUTPUT menu$
+10050 LINE0;CLEOL;CLS;"\n";PAPER 1;" ";CLEOL;bottom$
+10070 AT 2,13;SIZE 1;"<<< METEOR >>>"
+10080 PRINT AT 4,1;"1.";UNDERLINE 1;" Jouer";UNDERLINE 0;" "
+10090 PRINT "2. Records"
+10100 PRINT "3. Configuration"
+10110 PRINT "4. Crédits"
+10120 PRINT "5. Quitter"
+10130 CURSOR 1
+
+REM "----------------------------------------------"
+11000 OUTPUT jeu$
+11010 AT 0,1;CLEOL;"SCORE:000000 RECORD:000000";CLS
+
+REM "----------------------------------------------"
+11020 OUTPUT records$
+11030 LINE0;CLEOL;
+11040 CLS;"\n";PAPER 1;" ";CLEOL;bottom$
+11050 AT 2,13;SIZE 1;"<<< RECORDS >>>"
+11060 AT 4,1;"<Appuie sur une touche>"
+
+REM "----------------------------------------------"
+11070 OUTPUT config$
+11080 LINE0;CLEOL
+11090 CLS;"\n";PAPER 1;" ";CLEOL;bottom$
+11100 AT 2,10;SIZE 1;"<<< CONFIGURATION >>>"
+11110 AT 4,1;"<Appuie sur une touche>"
+
+REM "----------------------------------------------"
+11120 OUTPUT credits$
+11130 LINE0;CLEOL
+11140 CLS;"\n";PAPER 1;" ";CLEOL;bottom$
+11150 AT 2,13;SIZE 1;"<<< CREDITS >>>"
+11160 PRINT AT 5,20-6;SIZE 3;INVERSE 1;"BASTOS"
+11170 PRINT AT 7,2;"Inspiré par :"
+11180 PRINT " - Sinclair ZX81 / Spectrum"
+11190 PRINT " - Oric 1 / Atmos"
+11200 PRINT " - Amstrad CPC"
+11210 PRINT
+11220 PRINT AT 14,20-6;SIZE 3;FLASH 1;"METEOR";
+11230 PRINT AT 16,1;" Inspiré par";UNDERLINE 1;" METEOR";UNDERLINE 0;" : Premier jeu en"
+11240 PRINT " assembleur Z80 sur ZX81. Sur Minitel,"
+11250 PRINT " pas de mémoire écran, juste une prise"
+11260 PRINT " 4800(M1B)/9600(M2) bps."
+
+REM "----------------------------------------------"
+11270 OUTPUT STOP
+11280 RETURN
