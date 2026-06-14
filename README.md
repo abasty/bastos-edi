@@ -20,10 +20,7 @@ $ docker run -d --rm --name bastos-init abasty/bastos-edi:latest
 $ docker cp bastos-init:/opt/host/Makefile .
 $ docker cp bastos-init:/opt/host/docker-compose.yml .
 $ docker cp bastos-init:/opt/host/MANUAL.md .
-$ docker cp bastos-init:/opt/host/disk.tgz .
 $ docker stop -t1 bastos-init
-$ tar zxvf disk.tgz
-$ rm disk.tgz
 ```
 
 # Lancer le backend BASTOS-EDI
