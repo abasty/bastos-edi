@@ -160,7 +160,6 @@ def run_server(port=PORT):
     with socketserver.TCPServer(("", port), handler) as httpd:
         print(f"🚀 BASTOS-EDI Server started on http://localhost:{port}")
         print(f"📁 Disk folder: {os.path.abspath(DISK_FOLDER)}")
-        print(f"🌐 Press Ctrl+C to stop the server")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:

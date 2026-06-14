@@ -48,7 +48,6 @@ bastos-edi  | Starting vsftpd...
 bastos-edi  | Starting BASTOS-EDI server...
 bastos-edi  | 🚀 BASTOS-EDI Server started on http://localhost:9000
 bastos-edi  | 📁 Disk folder: /app/disk
-bastos-edi  | 🌐 Press Ctrl+C to stop the server
 ✓ Container started
 ```
 
