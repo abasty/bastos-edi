@@ -46,6 +46,7 @@ RUN chmod +x /app/bastos-edi.sh /app/bastos-edi.py
 # Copy binaries (if exists)
 RUN mkdir -p /usr/local/bin
 COPY bin/* /usr/local/bin/
+RUN curl -u anonymous:pat@frites.be -o /usr/local/bin/bastos ftp://abasty-retro.fr:2121/firmware/bastos
 
 # Create vsftpd lock file
 RUN touch /var/run/vsftpd.pid && chmod 777 /var/run/vsftpd.pid
