@@ -17,6 +17,12 @@ Les points principaux :
 - Exécution directe via un serveur local
 - Visionneuse Minitel avec clavier intégré
 
+BASTOS est un dialecte Basic pour terminaux Minitel. Les programmes BASTOS
+développés dans cet EDI sont exécutables sans changement sur [Sonoff Basic
+R2/R3/R4](https://github.com/abasty/minwifi-esp01). La documentation utilisateur
+BASTOS est disponible en ligne sur [Documentation
+BASTOS](https://abasty.github.io/minwifi-esp01/).
+
 ## Installer BASTOS-EDI (image Docker)
 
 - Docker doit être installé et doit pouvoir exécuter des conteneurs Linux. Le
