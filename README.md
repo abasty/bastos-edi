@@ -31,7 +31,9 @@ $ docker cp bastos-init:/opt/host/docker-compose.yml .
 $ docker stop -t1 bastos-init
 ```
 
-## Lancer le backend BASTOS-EDI
+## Lancer BASTOS-EDI
+
+### Lancer le backend BASTOS-EDI
 
 Pour démarrer le _backend_ :
 
@@ -47,14 +49,14 @@ bastos-edi  | 📁 Disk folder: /app/disk
 ✓ Container started
 ```
 
-## Lancer le frontend BASTOS-EDI
+### Lancer le frontend BASTOS-EDI
 
-### Mode fenêtré
+#### Mode fenêtré
 
 Lancer simplement un navigateur sur `http://localhost:9000` (ou Ctrl+Click sur
 l'URL visible dans la console après un `make start`).
 
-### Chrome/Chromium (Mode Application)
+#### Chrome/Chromium (Mode Application)
 
 Mode application sans bordures :
 
@@ -68,13 +70,13 @@ Ou avec Google Chrome :
 $ google-chrome --app=http://localhost:9000 --start-fullscreen --new-window
 ```
 
-### Firefox (Plein écran)
+#### Firefox (Plein écran)
 
 ```bash
 $ firefox --kiosk http://localhost:9000
 ```
 
-## Arrêter le backend BASTOS-EDI
+### Arrêter le backend BASTOS-EDI
 
 ```bash
 $ make stop
@@ -83,16 +85,3 @@ Stopping BASTOS-EDI backend
  ✔ Container bastos-edi Removed
  ✓ Container stopped
 ```
-
-## Tips pour l'émulateur BASTOS-EDI
-
-- Le mot de passe des réseaux émulés Wi-Fi est `changeme`
-- Pour sortir d'un programme BASTOS en exécution ou du mode connecté, **appuyer 2
-  fois sur la touche ESC** (Emprunté aux Amstrad CPC)
-- Si on est bloqué dans l'émulateur ou si on n'arrive pas à reprendre la main,
-  il suffit de recharger la page avec Shift+F5
-- Pour que les commandes "Exécuter" fonctionnent correctement (Tabs Fichiers et
-  Programme), il faut que, dans l'émulateur, on soit sorti du mode exécution ou
-  connecté (appuyer 2 fois sur ESC si ce n'est pas le cas)
-- Annulation est Ctrl+A, les raccourcis sont visibles dans la partie
-  configuration de l'émulateur
