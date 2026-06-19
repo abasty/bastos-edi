@@ -1,9 +1,16 @@
+---
+layout: page
+title: Manuel BASTOS-EDI
+---
+
 # MANUEL BASTOS-EDI
 
 ## Fonctionnalités générales
 
-BASTOS-EDI est un éditeur BASIC orienté Minitel, conçu pour écrire, tester et exécuter des programmes BASTOS dans un environnement web. Les points principaux :
+BASTOS-EDI est un éditeur BASIC orienté Minitel, conçu pour écrire, tester et
+exécuter des programmes BASTOS dans un environnement web.
 
+Les points principaux :
 - Éditeur de code avec coloration syntaxique BASTOS
 - Barre d'outils avec recherche, formatage, thèmes et préférences
 - Gestion de fichiers (chargement, sauvegarde, suppression)
@@ -14,7 +21,8 @@ BASTOS-EDI est un éditeur BASIC orienté Minitel, conçu pour écrire, tester e
 
 ### Onglet Minitel
 
-Cet onglet affiche un Minitel virtuel avec son clavier. Il sert à visualiser l'exécution des programmes et à interagir comme sur un vrai terminal.
+Cet onglet affiche un Minitel virtuel avec son clavier. Il sert à visualiser
+l'exécution des programmes et à interagir comme sur un vrai terminal.
 
 Fonctions :
 - Affichage du Minitel (écran)
@@ -32,7 +40,8 @@ Fonctions :
 
 ### Onglet Programme
 
-C'est l'éditeur principal. Vous y écrivez, modifiez et lancez vos programmes BASIC.
+C'est l'éditeur principal. Vous y écrivez, modifiez et lancez vos programmes
+BASIC.
 
 Fonctions principales :
 - Édition du code
@@ -71,18 +80,24 @@ Cette barre permet de gérer les fichiers courants et l'exécution :
 
 #### Renumérotation des lignes
 
-La fonction de renumérotation permet de renumériser les numéros de ligne d'un programme BASIC.
+La fonction de renumérotation permet de renumériser les numéros de ligne d'un
+programme BASIC.
 
 **Fonctionnement :**
 - Sélectionnez les lignes à renuméroter
-- Cliquez sur le bouton de renumérotation : une boîte de dialogue s'ouvre systématiquement
-- Le champ **Premier numéro** est prérempli avec le numéro de la première ligne numérotée de la sélection
+- Cliquez sur le bouton de renumérotation : une boîte de dialogue s'ouvre
+  systématiquement
+- Le champ **Premier numéro** est prérempli avec le numéro de la première ligne
+  numérotée de la sélection
 - Le champ **Incrément** est prérempli à `10` (modifiable)
 - Validez pour appliquer la renumérotation, ou annulez pour ne rien changer
-- Si la sélection ne contient aucune ligne numérotée, la boîte de dialogue indique que la renumérotation est impossible
-- Tous les numéros de ligne sélectionnés sont recalculés selon les valeurs saisies
+- Si la sélection ne contient aucune ligne numérotée, la boîte de dialogue
+  indique que la renumérotation est impossible
+- Tous les numéros de ligne sélectionnés sont recalculés selon les valeurs
+  saisies
 - Les lignes sans numéro sont ignorées
-- Les références `GOTO`, `GOSUB` et `THEN` sont automatiquement mises à jour dans **tout le document**
+- Les références `GOTO`, `GOSUB` et `THEN` sont automatiquement mises à jour
+  dans **tout le document**
 
 **Exemple :**
 ```

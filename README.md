@@ -1,23 +1,19 @@
 # README BASTOS-EDI
 
+## Dcumentation utilisateur
+
 Ce document décrit l'installation de BASTOS-EDI, un environnement de
 développement intégré pour BASTOS, qui s'exécute sur un ordinateur de bureau. Il
 nécessite un navigateur web avec JavaScript activé pour sa partie interface
-utilisateur, et Docker pour exécuter l'interpréteur BASTOS.
+utilisateur, et Docker pour exécuter l'interpréteur BASTOS. La documentation
+utilisateur de BASTOS-EDI est disponible en ligne sur [MANUEL
+BASTOS-EDI](https://abasty.github.io/bastos-edi/).
 
 BASTOS est un dialecte Basic pour terminaux Minitel. Les programmes BASTOS
 développés dans cet EDI sont exécutables sans changement sur [Sonoff Basic
-R2/R3/R4](https://github.com/abasty/minwifi-esp01/tree/master).
-
-- Lire [MANUEL
-  BASTOS-EDI](https://github.com/abasty/bastos-edi/blob/master/MANUAL.md) pour
-  utiliser BASTOS-EDI
-- Lire [QUICK-START
-  BASTOS](https://github.com/abasty/minwifi-esp01/blob/master/doc/BASTOS-QUICK-START-fr.md)
-  pour faire les premiers pas en BASTOS, télécharger et exécuter un jeu
-- Lire [MANUEL
-  BASTOS](https://github.com/abasty/minwifi-esp01/blob/master/doc/BASTOS-MANUAL-fr.md)
-  pour écrire ses propres programmes en BASTOS
+R2/R3/R4](https://github.com/abasty/minwifi-esp01). La documentation utilisateur
+BASTOS est disponible en ligne sur [Documentation
+BASTOS](https://abasty.github.io/minwifi-esp01/).
 
 ## Installer BASTOS-EDI (image Docker)
 
@@ -51,16 +47,6 @@ bastos-edi  | 📁 Disk folder: /app/disk
 ✓ Container started
 ```
 
-Pour arrêter le _backend_ :
-
-```bash
-$ make stop
-Stopping BASTOS-EDI backend
-[+] down 1/1
- ✔ Container bastos-edi Removed
- ✓ Container stopped
-```
-
 ## Lancer le frontend BASTOS-EDI
 
 ### Mode fenêtré
@@ -82,10 +68,20 @@ Ou avec Google Chrome :
 $ google-chrome --app=http://localhost:9000 --start-fullscreen --new-window
 ```
 
-## Firefox (Plein écran)
+### Firefox (Plein écran)
 
 ```bash
 $ firefox --kiosk http://localhost:9000
+```
+
+## Arrêter le backend BASTOS-EDI
+
+```bash
+$ make stop
+Stopping BASTOS-EDI backend
+[+] down 1/1
+ ✔ Container bastos-edi Removed
+ ✓ Container stopped
 ```
 
 ## Tips pour l'émulateur BASTOS-EDI
