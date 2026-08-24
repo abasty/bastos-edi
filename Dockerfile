@@ -60,6 +60,6 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Host files
 RUN mkdir -p /opt/host
-COPY Makefile docker-compose.yml MANUAL.md /opt/host/
+COPY Makefile docker-compose.yml README.md /opt/host/
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

@@ -1,6 +1,6 @@
 # README BASTOS-EDI
 
-## Dcumentation utilisateur
+## Documentation utilisateur
 
 Ce document décrit l'installation de BASTOS-EDI, un environnement de
 développement intégré pour BASTOS, qui s'exécute sur un ordinateur de bureau. Il
