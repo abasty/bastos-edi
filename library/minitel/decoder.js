@@ -605,6 +605,11 @@ Minitel.Decoder = class extends Minitel.Protocol {
         if(y === 0) {
             this.saveState()
             this.showCursor(false)
+
+            // Going on row 0 reassigns the standard G0 and G1 charsets. The
+            // DRCS glyphs already downloaded are kept.
+            this.drcs.g0 = false
+            this.drcs.g1 = false
         }
 
         // Minitel works from 1 to 40 while the PageMemory works with 0 to 39
